@@ -23,8 +23,8 @@ namespace Samples.Resources
         public async Task GetCookie(IHttpContext context)
         {
             var name = context.Request.PathParameters["name"];
-            var cookie = context.Request.Cookies.Where(c => c.Name == name).FirstOrDefault();
-            await context.Response.SendResponseAsync($"Cookie Value: {cookie.Value}");
+            var cookie = context.Request.Cookies.FirstOrDefault(c => c.Name == name);
+            await context.Response.SendResponseAsync($"Cookie Value: {cookie?.Value}");
         }
     }
 }

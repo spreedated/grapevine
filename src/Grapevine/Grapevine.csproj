@@ -26,7 +26,7 @@
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>grapevine.snk</AssemblyOriginatorKeyFile>
     <LangVersion>latest</LangVersion>
-      <NoWarn>1701;1702;IDE0063;S3925</NoWarn>
+    <NoWarn>1701;1702;IDE0063;S3925</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
