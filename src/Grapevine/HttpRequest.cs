@@ -11,58 +11,58 @@ namespace Grapevine
     {
         public HttpListenerRequest Advanced { get; }
 
-        public string[] AcceptTypes => Advanced.AcceptTypes;
+        public string[] AcceptTypes => this.Advanced.AcceptTypes;
 
-        public Encoding ContentEncoding => Advanced.ContentEncoding;
+        public Encoding ContentEncoding => this.Advanced.ContentEncoding;
 
-        public long ContentLength64 => Advanced.ContentLength64;
+        public long ContentLength64 => this.Advanced.ContentLength64;
 
-        public string ContentType => Advanced.ContentType;
+        public string ContentType => this.Advanced.ContentType;
 
-        public CookieCollection Cookies => Advanced.Cookies;
+        public CookieCollection Cookies => this.Advanced.Cookies;
 
-        public bool HasEntityBody => Advanced.HasEntityBody;
+        public bool HasEntityBody => this.Advanced.HasEntityBody;
 
-        public NameValueCollection Headers => Advanced.Headers;
+        public NameValueCollection Headers => this.Advanced.Headers;
 
         public string HostPrefix { get; }
 
-        public HttpMethod HttpMethod => Advanced.HttpMethod;
+        public HttpMethod HttpMethod => this.Advanced.HttpMethod;
 
-        public Stream InputStream => Advanced.InputStream;
+        public Stream InputStream => this.Advanced.InputStream;
 
         public string MultipartBoundary { get; }
 
-        public string Name => $"{HttpMethod} {Endpoint}";
+        public string Name => $"{this.HttpMethod} {this.Endpoint}";
 
         public string Endpoint { get; protected set; }
 
         public IDictionary<string, string> PathParameters { get; set; } = new Dictionary<string, string>();
 
-        public NameValueCollection QueryString => Advanced.QueryString;
+        public NameValueCollection QueryString => this.Advanced.QueryString;
 
-        public string RawUrl => Advanced.RawUrl;
+        public string RawUrl => this.Advanced.RawUrl;
 
-        public IPEndPoint RemoteEndPoint => Advanced.RemoteEndPoint;
+        public IPEndPoint RemoteEndPoint => this.Advanced.RemoteEndPoint;
 
-        public Uri Url => Advanced.Url;
+        public Uri Url => this.Advanced.Url;
 
-        public Uri UrlReferrer => Advanced.UrlReferrer;
+        public Uri UrlReferrer => this.Advanced.UrlReferrer;
 
-        public string UserAgent => Advanced.UserAgent;
+        public string UserAgent => this.Advanced.UserAgent;
 
-        public string UserHostAddress => Advanced.UserHostAddress;
+        public string UserHostAddress => this.Advanced.UserHostAddress;
 
-        public string UserHostname => Advanced.UserHostName;
+        public string UserHostname => this.Advanced.UserHostName;
 
-        public string[] UserLanguages => Advanced.UserLanguages;
+        public string[] UserLanguages => this.Advanced.UserLanguages;
 
         public HttpRequest(HttpListenerRequest request)
         {
-            Advanced = request;
-            Endpoint = request.Url.AbsolutePath.TrimEnd('/');
-            HostPrefix = request.Url.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
-            MultipartBoundary = this.GetMultipartBoundary();
+            this.Advanced = request;
+            this.Endpoint = request.Url.AbsolutePath.TrimEnd('/');
+            this.HostPrefix = request.Url.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
+            this.MultipartBoundary = this.GetMultipartBoundary();
         }
     }
 }

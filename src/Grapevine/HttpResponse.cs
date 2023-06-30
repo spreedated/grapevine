@@ -11,100 +11,100 @@ namespace Grapevine
 
         public Encoding ContentEncoding
         {
-            get { return Advanced.ContentEncoding; }
-            set { Advanced.ContentEncoding = value; }
+            get { return this.Advanced.ContentEncoding; }
+            set { this.Advanced.ContentEncoding = value; }
         }
 
         public TimeSpan ContentExpiresDuration { get; set; } = TimeSpan.FromDays(1);
 
         public long ContentLength64
         {
-            get { return Advanced.ContentLength64; }
-            set { Advanced.ContentLength64 = value; }
+            get { return this.Advanced.ContentLength64; }
+            set { this.Advanced.ContentLength64 = value; }
         }
 
         public string ContentType
         {
-            get { return Advanced.ContentType; }
-            set { Advanced.ContentType = value; }
+            get { return this.Advanced.ContentType; }
+            set { this.Advanced.ContentType = value; }
         }
 
         public CookieCollection Cookies
         {
-            get { return Advanced.Cookies; }
-            set { Advanced.Cookies = value; }
+            get { return this.Advanced.Cookies; }
+            set { this.Advanced.Cookies = value; }
         }
 
         public WebHeaderCollection Headers
         {
-            get { return Advanced.Headers; }
-            set { Advanced.Headers = value; }
+            get { return this.Advanced.Headers; }
+            set { this.Advanced.Headers = value; }
         }
 
         public string RedirectLocation
         {
-            get { return Advanced.RedirectLocation; }
-            set { Advanced.RedirectLocation = value; }
+            get { return this.Advanced.RedirectLocation; }
+            set { this.Advanced.RedirectLocation = value; }
         }
 
         public bool ResponseSent { get; protected internal set; }
 
         public int StatusCode
         {
-            get { return Advanced.StatusCode; }
+            get { return this.Advanced.StatusCode; }
             set
             {
-                Advanced.StatusDescription = (HttpStatusCode)value;
-                Advanced.StatusCode = value;
+                this.Advanced.StatusDescription = (HttpStatusCode)value;
+                this.Advanced.StatusCode = value;
             }
         }
 
         public string StatusDescription
         {
-            get { return Advanced.StatusDescription; }
-            set { Advanced.StatusDescription = value; }
+            get { return this.Advanced.StatusDescription; }
+            set { this.Advanced.StatusDescription = value; }
         }
 
         public bool SendChunked
         {
-            get { return Advanced.SendChunked; }
-            set { Advanced.SendChunked = value; }
+            get { return this.Advanced.SendChunked; }
+            set { this.Advanced.SendChunked = value; }
         }
 
         public void Abort()
         {
-            ResponseSent = true;
-            Advanced.Abort();
+            this.ResponseSent = true;
+            this.Advanced.Abort();
         }
 
-        public void AddHeader(string name, string value) => Advanced.AddHeader(name, value);
+        public void AddHeader(string name, string value) => this.Advanced.AddHeader(name, value);
 
-        public void AppendCookie(Cookie cookie) => Advanced.AppendCookie(cookie);
+        public void AppendCookie(Cookie cookie) => this.Advanced.AppendCookie(cookie);
 
-        public void AppendHeader(string name, string value) => Advanced.AppendHeader(name, value);
+        public void AppendHeader(string name, string value) => this.Advanced.AppendHeader(name, value);
 
         public void Redirect(string url)
         {
-            ResponseSent = true;
-            Advanced.Redirect(url);
+            this.ResponseSent = true;
+            this.Advanced.Redirect(url);
         }
 
         public abstract Task SendResponseAsync(byte[] contents);
 
-        public void SetCookie(Cookie cookie) => Advanced.SetCookie(cookie);
+        public void SetCookie(Cookie cookie) => this.Advanced.SetCookie(cookie);
 
         protected HttpResponseBase(HttpListenerResponse response)
         {
-            Advanced = response;
+            this.Advanced = response;
             response.ContentEncoding = Encoding.UTF8;
         }
 
         /// <summary>
-        /// Use this method to manually set the ResponseSent property to true. Generally, the value of this property is set by the SendResponseAsync method. If, however, this method was bypassed and the Advanced property was used to directly access the output stream, then the ResponseSent property will need to be set here to avoid an exception being thrown later in the routing process.
+        /// Use this method to manually set the ResponseSent property to true. Generally, the value of this property is set by the SendResponseAsync method. If, however, this method was bypassed and the this.Advanced property was used to directly access the output stream, then the ResponseSent property will need to be set here to avoid an exception being thrown later in the routing process.
         /// </summary>
         public virtual void MarkAsResponseSent()
         {
-            ResponseSent = true;
+            this.ResponseSent = true;
         }
     }
 
@@ -116,38 +116,38 @@ namespace Grapevine
 
         public virtual async Task<byte[]> CompressContentsAsync(byte[] contents)
         {
-            if (ContentType != null && ((ContentType)ContentType).IsBinary) return contents;
+            if (this.ContentType != null && ((ContentType)this.ContentType).IsBinary) return contents;
             if (contents.Length <= CompressionProvider.CompressIfContentLengthGreaterThan) return contents;
 
-            Headers["Content-Encoding"] = CompressionProvider.ContentEncoding;
-            return await CompressionProvider.CompressAsync(contents);
+            this.Headers["Content-Encoding"] = this.CompressionProvider.ContentEncoding;
+            return await this.CompressionProvider.CompressAsync(contents);
         }
 
         public async override Task SendResponseAsync(byte[] contents)
         {
-            if (!Advanced.OutputStream.CanWrite) throw new NotSupportedException("The response output stream can not be written to. It may have previously been written to, or the connection may no longer be available.");
+            if (!this.Advanced.OutputStream.CanWrite) throw new NotSupportedException("The response output stream can not be written to. It may have previously been written to, or the connection may no longer be available.");
 
             try
             {
-                contents = await CompressContentsAsync(contents);
-                ContentLength64 = contents.Length;
+                contents = await this.CompressContentsAsync(contents);
+                this.ContentLength64 = contents.Length;
 
-                await Advanced.OutputStream.WriteAsync(contents, 0, (int)ContentLength64);
-                Advanced.OutputStream.Close();
+                await this.Advanced.OutputStream.WriteAsync(contents, 0, (int)this.ContentLength64);
+                this.Advanced.OutputStream.Close();
             }
             catch (StatusCodeException sce)
             {
-                StatusCode = sce.StatusCode;
+                this.StatusCode = sce.StatusCode;
             }
             catch
             {
-                if (Advanced.OutputStream.CanWrite) Advanced.OutputStream.Close();
+                if (this.Advanced.OutputStream.CanWrite) this.Advanced.OutputStream.Close();
                 throw;
             }
             finally
             {
-                ResponseSent = true;
-                Advanced.Close();
+                this.ResponseSent = true;
+                this.Advanced.Close();
             }
         }
     }
