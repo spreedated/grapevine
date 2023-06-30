@@ -2,7 +2,7 @@ using System.Collections.Specialized;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Grapevine;
-using Grapevine.Client;
+using FluentHttpClient;
 
 namespace Samples.Clients
 {
