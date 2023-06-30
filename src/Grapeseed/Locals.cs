@@ -5,9 +5,9 @@ namespace Grapevine
 #if NETSTANDARD2_0 || NET472
     public class Locals : ConcurrentDictionary<object, object> { }
 #else
-    #nullable enable
+#nullable enable
     public class Locals : ConcurrentDictionary<object, object?> { }
-    #nullable restore
+#nullable restore
 #endif
 
     public static class LocalExtensions
@@ -21,12 +21,12 @@ namespace Grapevine
 
         public static T GetAs<T>(this Locals l, object key)
         {
-            return (T) l.Get(key);
+            return (T)l.Get(key);
         }
 
         public static T GetOrAddAs<T>(this Locals l, object key, object value)
         {
-            return (T) l.GetOrAdd(key, value);
+            return (T)l.GetOrAdd(key, value);
         }
     }
 }

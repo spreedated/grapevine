@@ -1,10 +1,10 @@
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace Grapevine
 {
@@ -29,79 +29,85 @@ namespace Grapevine
 
         public override string FolderPath
         {
-            get => _path;
+            get => this._path;
             set
             {
                 if (string.IsNullOrWhiteSpace(value)) return;
 
                 var path = Path.GetFullPath(value);
-                if (_path == path) return;
+                if (this._path == path) return;
 
                 if (!Directory.Exists(path)) path = Directory.CreateDirectory(path).FullName;
-                _path = path;
-                DirectoryMapping?.Clear();
+                this._path = path;
+                this.DirectoryMapping?.Clear();
 
-                Watcher?.Dispose();
-                Watcher = new FileSystemWatcher
+                this.Watcher?.Dispose();
+                this.Watcher = new()
                 {
-                    Path = _path,
+                    Path = this._path,
                     Filter = "*",
                     EnableRaisingEvents = true,
                     IncludeSubdirectories = true,
                     NotifyFilter = NotifyFilters.FileName
                 };
 
-                Watcher.Created += (sender, args) => { AddToDirectoryListing(args.FullPath); };
-                Watcher.Deleted += (sender, args) => { RemoveFromDirectoryListing(args.FullPath); };
-                Watcher.Renamed += (sender, args) => { RenameInDirectoryListing(args.OldFullPath, args.FullPath); };
+                this.Watcher.Created += (sender, args) => { this.AddToDirectoryListing(args.FullPath); };
+                this.Watcher.Deleted += (sender, args) => { this.RemoveFromDirectoryListing(args.FullPath); };
+                this.Watcher.Renamed += (sender, args) => { this.RenameInDirectoryListing(args.OldFullPath, args.FullPath); };
             }
         }
 
         public override string IndexFileName
         {
-            get { return _indexFileName; }
+            get { return this._indexFileName; }
             set
             {
-                if (string.IsNullOrWhiteSpace(value) || _indexFileName.Equals(value, StringComparison.CurrentCultureIgnoreCase)) return;
-                _indexFileName = value;
-                DirectoryMapping?.Clear();
+                if (string.IsNullOrWhiteSpace(value) || this._indexFileName.Equals(value, StringComparison.CurrentCultureIgnoreCase)) return;
+                this._indexFileName = value;
+                this.DirectoryMapping?.Clear();
             }
         }
 
         public ILogger<IContentFolder> Logger { get; protected set; }
         public override string Prefix
         {
-            get { return _prefix; }
+            get { return this._prefix; }
             set
             {
                 var prefix = (string.IsNullOrWhiteSpace(value))
                     ? string.Empty
                     : $"/{value.Trim().TrimStart('/').TrimEnd('/').Trim()}";
 
-                if (_prefix.Equals(prefix, StringComparison.CurrentCultureIgnoreCase)) return;
+                if (this._prefix.Equals(prefix, StringComparison.CurrentCultureIgnoreCase)) return;
 
-                _prefix = prefix;
-                DirectoryMapping?.Clear();
+                this._prefix = prefix;
+                this.DirectoryMapping?.Clear();
             }
         }
 
         public void Dispose()
         {
-            Watcher?.Dispose();
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            this.Watcher?.Dispose();
         }
 
         public async override Task SendFileAsync(IHttpContext context)
         {
-            await SendFileAsync(context, null);
+            await this.SendFileAsync(context, null);
         }
 
         public async override Task SendFileAsync(IHttpContext context, string filename)
         {
-            PopulateDirectoryListing();
+            this.PopulateDirectoryListing();
 
-            if (DirectoryMapping.ContainsKey(context.Request.Endpoint))
+            if (this.DirectoryMapping.ContainsKey(context.Request.Endpoint))
             {
-                var filepath = DirectoryMapping[context.Request.Endpoint];
+                var filepath = this.DirectoryMapping[context.Request.Endpoint];
                 context.Response.StatusCode = HttpStatusCode.Ok;
 
                 var lastModified = File.GetLastWriteTimeUtc(filepath).ToString("R");
@@ -118,14 +124,14 @@ namespace Grapevine
 
                 context.Response.ContentType = ContentType.FindKey(Path.GetExtension(filepath).TrimStart('.').ToLower());
 
-                using (var stream = new FileStream(filepath, FileMode.Open))
+                using (FileStream stream = new(filepath, FileMode.Open))
                 {
                     await context.Response.SendResponseAsync(stream);
                 }
             }
 
             // File not found, but should have been based on the path info
-            else if (!string.IsNullOrEmpty(Prefix) && context.Request.Endpoint.StartsWith(Prefix, StringComparison.CurrentCultureIgnoreCase))
+            else if (!string.IsNullOrEmpty(this.Prefix) && context.Request.Endpoint.StartsWith(this.Prefix, StringComparison.CurrentCultureIgnoreCase))
             {
                 context.Response.StatusCode = HttpStatusCode.NotFound;
             }
@@ -151,18 +157,17 @@ namespace Grapevine
         public abstract string Prefix { get; set; }
         public virtual void AddToDirectoryListing(string fullPath)
         {
-            if (DirectoryMapping == null)
-                DirectoryMapping = new ConcurrentDictionary<string, string>();
+            this.DirectoryMapping ??= new();
 
-            DirectoryMapping[CreateDirectoryListingKey(fullPath)] = fullPath;
+            this.DirectoryMapping[this.CreateDirectoryListingKey(fullPath)] = fullPath;
 
-            if (fullPath.EndsWith($"{Path.DirectorySeparatorChar}{IndexFileName}", StringComparison.CurrentCultureIgnoreCase))
-                DirectoryMapping[CreateDirectoryListingKey(fullPath.Replace($"{Path.DirectorySeparatorChar}{IndexFileName}", ""))] = fullPath;
+            if (fullPath.EndsWith($"{Path.DirectorySeparatorChar}{this.IndexFileName}", StringComparison.CurrentCultureIgnoreCase))
+                this.DirectoryMapping[this.CreateDirectoryListingKey(fullPath.Replace($"{Path.DirectorySeparatorChar}{this.IndexFileName}", ""))] = fullPath;
         }
 
         public virtual string CreateDirectoryListingKey(string item)
         {
-            return $"{Prefix}{item.Replace(FolderPath, string.Empty).Replace(@"\", "/")}";
+            return $"{this.Prefix}{item.Replace(this.FolderPath, string.Empty).Replace(@"\", "/")}";
         }
 
         public IList<string> DirectoryListing()
@@ -171,26 +176,26 @@ namespace Grapevine
         }
         public virtual void PopulateDirectoryListing()
         {
-            if (DirectoryMapping?.Count > 0) return;
+            if (this.DirectoryMapping?.Count > 0) return;
 
-            Directory.GetFiles(FolderPath, "*", SearchOption.AllDirectories)
+            Directory.GetFiles(this.FolderPath, "*", SearchOption.AllDirectories)
                 .ToList()
-                .ForEach(AddToDirectoryListing);
+                .ForEach(this.AddToDirectoryListing);
         }
 
         public virtual void RemoveFromDirectoryListing(string fullPath)
         {
-            if (DirectoryMapping == null) return;
+            if (this.DirectoryMapping == null) return;
 
-            DirectoryMapping.Where(x => x.Value == fullPath)
+            this.DirectoryMapping.Where(x => x.Value == fullPath)
                 .ToList()
-                .ForEach(pair => DirectoryMapping.TryRemove(pair.Key, out string key));
+                .ForEach(pair => this.DirectoryMapping.TryRemove(pair.Key, out string key));
         }
 
         public virtual void RenameInDirectoryListing(string oldFullPath, string newFullPath)
         {
-            RemoveFromDirectoryListing(oldFullPath);
-            AddToDirectoryListing(newFullPath);
+            this.RemoveFromDirectoryListing(oldFullPath);
+            this.AddToDirectoryListing(newFullPath);
         }
 
         public abstract Task SendFileAsync(IHttpContext context);

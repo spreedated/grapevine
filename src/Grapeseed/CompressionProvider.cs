@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Grapevine
@@ -19,8 +18,8 @@ namespace Grapevine
         {
             if (acceptedEncodings.Count != 0)
             {
-                CompressAsync = GetCompressionDelegate(acceptedEncodings, identityForbidden, out string contentEncoding);
-                ContentEncoding = contentEncoding;
+                this.CompressAsync = GetCompressionDelegate(acceptedEncodings, identityForbidden, out string contentEncoding);
+                this.ContentEncoding = contentEncoding;
             }
         }
     }
@@ -51,9 +50,9 @@ namespace Grapevine
 
         public static async Task<byte[]> GzipAsyncCompressionDelegateFastest(byte[] contents)
         {
-            using (var ms = new MemoryStream())
+            using (MemoryStream ms = new())
             {
-                using (var gzip = new GZipStream(ms, CompressionLevel.Fastest))
+                using (GZipStream gzip = new(ms, CompressionLevel.Fastest))
                 {
                     await gzip.WriteAsync(contents, 0, contents.Length);
                     gzip.Close();
@@ -64,9 +63,9 @@ namespace Grapevine
 
         public static async Task<byte[]> GzipAsyncCompressionDelegateOptimal(byte[] contents)
         {
-            using (var ms = new MemoryStream())
+            using (MemoryStream ms = new())
             {
-                using (var gzip = new GZipStream(ms, CompressionLevel.Optimal))
+                using (GZipStream gzip = new(ms, CompressionLevel.Optimal))
                 {
                     await gzip.WriteAsync(contents, 0, contents.Length);
                     gzip.Close();

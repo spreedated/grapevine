@@ -121,7 +121,7 @@ namespace Grapevine
                 response.AddHeader("Expires",
                     DateTime.Now.Add(response.ContentExpiresDuration).ToString("R"));
 
-            using (var buffer = new MemoryStream())
+            using (MemoryStream buffer = new())
             {
                 await content.CopyToAsync(buffer);
                 await response.SendResponseAsync(buffer.ToArray());
@@ -130,13 +130,13 @@ namespace Grapevine
 
         public static async Task SendResponseAsync(this IHttpResponse response)
         {
-            await response.SendResponseAsync(new byte[0]);
+            await response.SendResponseAsync(Array.Empty<byte>());
         }
 
         public static async Task SendResponseAsync(this IHttpResponse response, HttpStatusCode statusCode)
         {
             response.StatusCode = statusCode;
-            await response.SendResponseAsync(new byte[0]);
+            await response.SendResponseAsync(Array.Empty<byte>());
         }
 
         public static async Task SendResponseAsync(this IHttpResponse response, string content)

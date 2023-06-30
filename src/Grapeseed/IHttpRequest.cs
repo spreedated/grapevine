@@ -137,9 +137,9 @@ namespace Grapevine
 
         public static async Task<IDictionary<string, string>> ParseFormUrlEncodedData(this IHttpRequest request, bool useQueryArguments = false)
         {
-            var data = new Dictionary<string, string>();
+            Dictionary<string, string> data = new();
 
-            using (var reader = new StreamReader(request.InputStream, request.ContentEncoding))
+            using (StreamReader reader = new(request.InputStream, request.ContentEncoding))
             {
                 string payload = null;
                 if (useQueryArguments || request.InputStream == Stream.Null)
@@ -165,7 +165,7 @@ namespace Grapevine
                 var key = pair[0];
                 var value = pair[1];
 
-                var decoded = string.Empty;
+                string decoded;
                 while ((decoded = Uri.UnescapeDataString(value)) != value)
                 {
                     value = decoded;

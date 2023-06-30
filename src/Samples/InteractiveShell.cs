@@ -1,6 +1,6 @@
+using Grapevine;
 using System;
 using System.Threading;
-using Grapevine;
 
 namespace Samples
 {

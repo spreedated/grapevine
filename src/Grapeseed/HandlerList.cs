@@ -8,7 +8,7 @@ namespace Grapevine
         public async Task<int> Invoke(IHttpContext context, IRestServer server)
         {
             var counter = 0;
-            foreach(var handler in this)
+            foreach (var handler in this)
             {
                 await handler(context, server);
                 counter++;
@@ -17,13 +17,13 @@ namespace Grapevine
             return counter;
         }
 
-        public static RequestReceivedEvent operator + (RequestReceivedEvent source, RequestReceivedAsyncEventHandler obj)
+        public static RequestReceivedEvent operator +(RequestReceivedEvent source, RequestReceivedAsyncEventHandler obj)
         {
             source.Add(obj);
             return source;
         }
 
-        public static RequestReceivedEvent operator - (RequestReceivedEvent source, RequestReceivedAsyncEventHandler obj)
+        public static RequestReceivedEvent operator -(RequestReceivedEvent source, RequestReceivedAsyncEventHandler obj)
         {
             source.Remove(obj);
             return source;
@@ -35,7 +35,7 @@ namespace Grapevine
         public async Task<int> Invoke(IHttpContext context)
         {
             var counter = 0;
-            foreach(var handler in this)
+            foreach (var handler in this)
             {
                 await handler(context);
                 counter++;
@@ -44,13 +44,13 @@ namespace Grapevine
             return counter;
         }
 
-        public static RequestRoutingEvent operator + (RequestRoutingEvent source, RoutingAsyncEventHandler obj)
+        public static RequestRoutingEvent operator +(RequestRoutingEvent source, RoutingAsyncEventHandler obj)
         {
             source.Add(obj);
             return source;
         }
 
-        public static RequestRoutingEvent operator - (RequestRoutingEvent source, RoutingAsyncEventHandler obj)
+        public static RequestRoutingEvent operator -(RequestRoutingEvent source, RoutingAsyncEventHandler obj)
         {
             source.Remove(obj);
             return source;

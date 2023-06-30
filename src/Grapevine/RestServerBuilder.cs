@@ -1,10 +1,10 @@
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Grapevine
 {
@@ -43,19 +43,19 @@ namespace Grapevine
         {
             this.Configuration ??= GetDefaultConfiguration();
 
-            this.Services.AddSingleton(typeof(IConfiguration), Configuration);
+            this.Services.AddSingleton(typeof(IConfiguration), this.Configuration);
             this.Services.AddSingleton<IRestServer, RestServer>();
             this.Services.AddSingleton<IRouter, Router>();
             this.Services.AddSingleton<IRouteScanner, RouteScanner>();
             this.Services.AddTransient<IContentFolder, ContentFolder>();
 
-            ConfigureServices?.Invoke(Services);
+            this.ConfigureServices?.Invoke(this.Services);
 
-            var provider = Services.BuildServiceProvider();
+            var provider = this.Services.BuildServiceProvider();
 
             var server = provider.GetRequiredService<IRestServer>();
-            server.Router.Services = Services;
-            server.RouteScanner.Services = Services;
+            server.Router.Services = this.Services;
+            server.RouteScanner.Services = this.Services;
 
             var factory = provider.GetService<ILoggerFactory>();
             if (factory != null) server.SetDefaultLogger(factory);
@@ -122,11 +122,11 @@ namespace Grapevine
 
             // Initialize Services: ReturnType(IServiceCollection), Args(null)
             var msi = methods.FirstOrDefault(m => m.ReturnParameter.ParameterType == typeof(IServiceCollection) && m.GetParameters().Length == 0);
-            Func<IServiceCollection> serviceInitializer = () =>
+            IServiceCollection serviceInitializer()
             {
                 if (msi == null) return new ServiceCollection();
                 return (IServiceCollection)msi.Invoke(obj, null);
-            };
+            }
 
             // Configure Services: ReturnType(void), Arg[0](IServiceCollection)
             var mcs = methods.Where(m => m.ReturnParameter.ParameterType == typeof(void) && m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType == typeof(IServiceCollection));
@@ -144,7 +144,7 @@ namespace Grapevine
                 foreach (var method in mcr) method.Invoke(obj, new object[] { s });
             }
 
-            return new RestServerBuilder(serviceInitializer.Invoke(), configInitializer(), configureServices, configureServer);
+            return new RestServerBuilder(serviceInitializer(), configInitializer(), configureServices, configureServer);
         }
 
         private static IConfiguration GetDefaultConfiguration()

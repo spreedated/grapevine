@@ -1,10 +1,10 @@
+using Grapevine;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using Grapevine;
-using Microsoft.Extensions.Logging;
 
 namespace Samples
 {

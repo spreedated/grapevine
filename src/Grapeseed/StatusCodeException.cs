@@ -8,7 +8,7 @@ namespace Grapevine
 
         public StatusCodeException(HttpStatusCode statusCode) : base()
         {
-            StatusCode = statusCode;
+            this.StatusCode = statusCode;
         }
     }
 }

@@ -12,9 +12,9 @@ namespace Grapevine
 
         public GlobalResponseHeaders(string name, string defaultValue, bool suppress = false)
         {
-            Name = name;
-            Value = defaultValue;
-            Suppress = suppress;
+            this.Name = name;
+            this.Value = defaultValue;
+            this.Suppress = suppress;
         }
     }
 
@@ -22,7 +22,7 @@ namespace Grapevine
     {
         public static void Add(this IList<GlobalResponseHeaders> headers, string key, string value)
         {
-            headers.Add(new GlobalResponseHeaders(key, value));
+            headers.Add(new(key, value));
         }
     }
 }

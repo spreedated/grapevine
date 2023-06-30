@@ -1,5 +1,7 @@
-using System.Net;
+#pragma warning disable IDE0060
+
 using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace Grapevine
 {

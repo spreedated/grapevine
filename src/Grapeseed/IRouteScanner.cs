@@ -1,7 +1,7 @@
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Grapevine
 {
@@ -67,7 +67,7 @@ namespace Grapevine
         /// <param name="basePath"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static IList<IRoute> ScanAssemblyContainingType<T>(this IRouteScanner scanner, IServiceCollection services = null, string basePath = null)
+        public static IList<IRoute> ScanAssemblyContainingType<T>(this IRouteScanner scanner, string basePath = null)
         {
             Assembly assembly = Assembly.GetAssembly(typeof(T));
             return scanner.Scan(assembly, basePath);

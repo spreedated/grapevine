@@ -6,9 +6,9 @@ namespace Grapevine
 {
     public class HttpMethod : System.Net.Http.HttpMethod
     {
-        public static HttpMethod Any { get; } = new HttpMethod("Any");
+        public static HttpMethod Any { get; } = new("Any");
 
-        private static readonly Dictionary<string, HttpMethod> _httpMethods = new Dictionary<string, HttpMethod>();
+        private static readonly Dictionary<string, HttpMethod> _httpMethods = new();
 
         static HttpMethod()
         {
@@ -50,7 +50,7 @@ namespace Grapevine
         public static string Add(string value)
         {
             var key = value.ToLower();
-            if (!_httpMethods.ContainsKey(key)) _httpMethods.Add(key, new HttpMethod(value));
+            if (!_httpMethods.ContainsKey(key)) _httpMethods.Add(key, new(value));
             return key;
         }
     }

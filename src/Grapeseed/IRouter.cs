@@ -1,8 +1,8 @@
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Grapevine
 {
@@ -90,7 +90,7 @@ namespace Grapevine
 
     public static partial class IRouterExtensions
     {
-        private static IDictionary<string, IServiceProvider> _providers = new Dictionary<string, IServiceProvider>();
+        private readonly static IDictionary<string, IServiceProvider> _providers = new Dictionary<string, IServiceProvider>();
 
         public static IServiceProvider GetServiceProvider(this IRouter router)
         {

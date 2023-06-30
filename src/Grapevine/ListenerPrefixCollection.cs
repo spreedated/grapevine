@@ -15,7 +15,7 @@ namespace Grapevine
 
         protected HttpListenerPrefixCollection PrefixCollection;
 
-        public ListenerPrefixCollection (HttpListenerPrefixCollection prefixes)
+        public ListenerPrefixCollection(HttpListenerPrefixCollection prefixes)
         {
             PrefixCollection = prefixes;
         }

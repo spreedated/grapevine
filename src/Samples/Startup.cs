@@ -1,11 +1,11 @@
-using System;
-using System.IO;
 using Grapevine;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using Samples.Clients;
+using System;
+using System.IO;
 
 namespace Samples
 {

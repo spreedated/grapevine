@@ -1,7 +1,7 @@
+using Grapevine;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Grapevine;
 using HttpStatusCode = Grapevine.HttpStatusCode;
 
 namespace Samples.Resources

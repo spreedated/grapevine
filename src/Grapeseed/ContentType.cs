@@ -1,3 +1,5 @@
+#pragma warning disable S3963
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,41 +12,41 @@ namespace Grapevine
     {
         #region Static Implementations
 
-        public static ContentType Binary { get; } = new ContentType("application/octet-stream");
+        public static ContentType Binary { get; } = new("application/octet-stream");
 
-        public static ContentType Css { get; } = new ContentType("text/css", false, "UTF-8");
+        public static ContentType Css { get; } = new("text/css", false, "UTF-8");
 
-        public static ContentType FormUrlEncoded { get; } = new ContentType("application/x-www-form-urlencoded");
+        public static ContentType FormUrlEncoded { get; } = new("application/x-www-form-urlencoded");
 
-        public static ContentType Gif { get; } = new ContentType("image/gif");
+        public static ContentType Gif { get; } = new("image/gif");
 
-        public static ContentType Html { get; } = new ContentType("text/html", false, "UTF-8");
+        public static ContentType Html { get; } = new("text/html", false, "UTF-8");
 
-        public static ContentType Icon { get; } = new ContentType("image/x-icon");
+        public static ContentType Icon { get; } = new("image/x-icon");
 
-        public static ContentType JavaScript { get; } = new ContentType("application/javascript", false, "UTF-8");
+        public static ContentType JavaScript { get; } = new("application/javascript", false, "UTF-8");
 
-        public static ContentType Json { get; } = new ContentType("application/json", false, "UTF-8");
+        public static ContentType Json { get; } = new("application/json", false, "UTF-8");
 
-        public static ContentType Jpg { get; } = new ContentType("image/jpeg");
+        public static ContentType Jpg { get; } = new("image/jpeg");
 
-        public static ContentType Mp3 { get; } = new ContentType("audio/mpeg");
+        public static ContentType Mp3 { get; } = new("audio/mpeg");
 
-        public static ContentType Mp4 { get; } = new ContentType("video/mp4");
+        public static ContentType Mp4 { get; } = new("video/mp4");
 
-        public static ContentType MultipartFormData { get; } = new ContentType("multipart/form-data");
+        public static ContentType MultipartFormData { get; } = new("multipart/form-data");
 
-        public static ContentType Pdf { get; } = new ContentType("application/pdf");
+        public static ContentType Pdf { get; } = new("application/pdf");
 
-        public static ContentType Png { get; } = new ContentType("image/png");
+        public static ContentType Png { get; } = new("image/png");
 
-        public static ContentType Svg { get; } = new ContentType("image/svg+xml", false, "UTF-8");
+        public static ContentType Svg { get; } = new("image/svg+xml", false, "UTF-8");
 
-        public static ContentType Text { get; } = new ContentType("text/plain", false, "UTF-8");
+        public static ContentType Text { get; } = new("text/plain", false, "UTF-8");
 
-        public static ContentType Xml { get; } = new ContentType("application/xml", false, "UTF-8");
+        public static ContentType Xml { get; } = new("application/xml", false, "UTF-8");
 
-        public static ContentType Zip { get; } = new ContentType("application/zip");
+        public static ContentType Zip { get; } = new("application/zip");
 
         #endregion
 
@@ -82,39 +84,39 @@ namespace Grapevine
 
         public ContentType(string value, bool isBinary = true, string charSet = "")
         {
-            Value = value;
-            IsBinary = isBinary;
-            CharSet = charSet;
+            this.Value = value;
+            this.IsBinary = isBinary;
+            this.CharSet = charSet;
         }
 
         public void ResetBoundary(string newBoundary = null)
         {
-            if (Value.StartsWith("multipart"))
+            if (this.Value.StartsWith("multipart"))
             {
-                _value = null;
-                Boundary = MultiPartBoundary.Generate(newBoundary);
+                this._value = null;
+                this.Boundary = MultiPartBoundary.Generate(newBoundary);
             }
         }
 
         public override string ToString()
         {
-            if (string.IsNullOrWhiteSpace(_value))
+            if (string.IsNullOrWhiteSpace(this._value))
             {
-                var sb = new StringBuilder(Value);
+                StringBuilder sb = new(this.Value);
 
-                if (!string.IsNullOrWhiteSpace(Boundary))
+                if (!string.IsNullOrWhiteSpace(this.Boundary))
                 {
-                    sb.Append($"; boundary={Boundary}");
+                    sb.Append($"; boundary={this.Boundary}");
                 }
-                else if (!string.IsNullOrWhiteSpace(CharSet))
+                else if (!string.IsNullOrWhiteSpace(this.CharSet))
                 {
-                    sb.Append($"; charset={CharSet}");
+                    sb.Append($"; charset={this.CharSet}");
                 }
 
-                _value = sb.ToString();
+                this._value = sb.ToString();
             }
 
-            return _value;
+            return this._value;
         }
 
         public static implicit operator ContentType(string value)
@@ -141,15 +143,26 @@ namespace Grapevine
                 : ContentType.Binary;
         }
 
+        private static string CheckOnStringAndCharSet(string value, string charSet)
+        {
+            if (value.Contains(';') && string.IsNullOrWhiteSpace(charSet))
+            {
+                return value;
+            }
+
+            if (string.IsNullOrWhiteSpace(charSet))
+            {
+                return value;
+            }
+
+            return $"{value}; charset={charSet}";
+        }
+
         public static void Add(string value, bool isBinary = true, string charSet = "")
         {
             if (_contentTypes.ContainsKey(value)) return;
 
-            var key = (value.Contains(';') && string.IsNullOrWhiteSpace(charSet))
-                ? value
-                : string.IsNullOrWhiteSpace(charSet)
-                    ? value
-                    : $"{value}; charset={charSet}";
+            string key = CheckOnStringAndCharSet(value, charSet);
 
             if (_contentTypes.ContainsKey(key)) return;
 
@@ -160,7 +173,7 @@ namespace Grapevine
                 charSet = parts[1]?.Replace("charset=", "").Trim();
             }
 
-            var contentType = new ContentType(value, isBinary, charSet);
+            ContentType contentType = new(value, isBinary, charSet);
             _contentTypes.Add(contentType, contentType);
         }
 
@@ -175,7 +188,7 @@ namespace Grapevine
             if (string.IsNullOrWhiteSpace(boundary))
                 boundary = MultiPartBoundary.Generate();
 
-            return new ContentType($"multipart/{multipart.ToString().ToLower()}", false, "")
+            return new($"multipart/{multipart.ToString().ToLower()}", false, "")
             {
                 Boundary = boundary.Substring(0, 70).TrimEnd()
             };
@@ -189,7 +202,7 @@ namespace Grapevine
 
         private static readonly char[] _multipartChars = "-_1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
 
-        private static readonly Random _random = new Random();
+        private static readonly Random _random = new();
 
         public static string Generate(string firstPart = "----=NextPart_")
         {
@@ -200,7 +213,7 @@ namespace Grapevine
 
             if (firstPart?.Length >= MIN_BOUNDARY_LENGTH) return firstPart;
 
-            var sb = new StringBuilder(firstPart);
+            StringBuilder sb = new(firstPart);
             var init_size = firstPart.Length;
             var end_size = _random.Next(MIN_BOUNDARY_LENGTH, MAX_BOUNDARY_LENGTH);
 
