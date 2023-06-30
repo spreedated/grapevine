@@ -33,21 +33,21 @@ namespace Grapevine
 
         public RestServerBuilder(IServiceCollection services, IConfiguration configuration, Action<IServiceCollection> configureServices, Action<IRestServer> configureServer)
         {
-            Services = services ?? new ServiceCollection();
-            Configuration = configuration ?? GetDefaultConfiguration();
-            ConfigureServices = configureServices;
-            ConfigureServer = configureServer;
+            this.Services = services ?? new ServiceCollection();
+            this.Configuration = configuration ?? GetDefaultConfiguration();
+            this.ConfigureServices = configureServices;
+            this.ConfigureServer = configureServer;
         }
 
         public IRestServer Build()
         {
-            if (Configuration == null) Configuration = GetDefaultConfiguration();
+            this.Configuration ??= GetDefaultConfiguration();
 
-            Services.AddSingleton(typeof(IConfiguration), Configuration);
-            Services.AddSingleton<IRestServer, RestServer>();
-            Services.AddSingleton<IRouter, Router>();
-            Services.AddSingleton<IRouteScanner, RouteScanner>();
-            Services.AddTransient<IContentFolder, ContentFolder>();
+            this.Services.AddSingleton(typeof(IConfiguration), Configuration);
+            this.Services.AddSingleton<IRestServer, RestServer>();
+            this.Services.AddSingleton<IRouter, Router>();
+            this.Services.AddSingleton<IRouteScanner, RouteScanner>();
+            this.Services.AddTransient<IContentFolder, ContentFolder>();
 
             ConfigureServices?.Invoke(Services);
 
@@ -60,15 +60,15 @@ namespace Grapevine
             var factory = provider.GetService<ILoggerFactory>();
             if (factory != null) server.SetDefaultLogger(factory);
 
-            var assembly = GetType().Assembly.GetName();
+            var assembly = this.GetType().Assembly.GetName();
             server.GlobalResponseHeaders.Add("Server", $"{assembly.Name}/{assembly.Version} ({RuntimeInformation.OSDescription})");
 
             // Override with instances
-            Services.AddSingleton<IRestServer>(server);
-            Services.AddSingleton<IRouter>(server.Router);
-            Services.AddSingleton<IRouteScanner>(server.RouteScanner);
+            this.Services.AddSingleton<IRestServer>(server);
+            this.Services.AddSingleton<IRouter>(server.Router);
+            this.Services.AddSingleton<IRouteScanner>(server.RouteScanner);
 
-            ConfigureServer?.Invoke(server);
+            this.ConfigureServer?.Invoke(server);
 
             return server;
         }
@@ -77,16 +77,16 @@ namespace Grapevine
         {
             var config = GetDefaultConfiguration();
 
-            Action<IServiceCollection> configServices = (services) =>
+            static void configServices(IServiceCollection services)
             {
                 services.AddLogging(configure => configure.AddConsole());
                 services.Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Trace);
-            };
+            }
 
-            Action<IRestServer> configServer = (server) =>
+            static void configServer(IRestServer server)
             {
                 server.Prefixes.Add("http://localhost:1234/");
-            };
+            }
 
             return new RestServerBuilder(new ServiceCollection(), config, configServices, configServer);
         }
@@ -99,7 +99,7 @@ namespace Grapevine
             var constructor = type.GetConstructors().FirstOrDefault(c =>
             {
                 var args = c.GetParameters();
-                return args.Count() == 1 && args.First().ParameterType == typeof(IConfiguration);
+                return args.Length == 1 && args.First().ParameterType == typeof(IConfiguration);
             });
 
             // Get the configuration
@@ -107,18 +107,18 @@ namespace Grapevine
 
             // Instanciate startup
             var obj = (constructor != null)
-                ? Activator.CreateInstance(type, new object[] { config })
-                : Activator.CreateInstance(type, new object[] { });
+                ? Activator.CreateInstance(type, config)
+                : Activator.CreateInstance(type);
 
             var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
 
             // Initialize Configuration: ReturnType(IConfiguration), Args(null)
             var mci = methods.FirstOrDefault(m => m.ReturnParameter.ParameterType == typeof(IConfiguration) && m.GetParameters().Length == 0);
-            Func<IConfiguration> configInitializer = () =>
+            IConfiguration configInitializer()
             {
                 if (mci == null) return config;
                 return (IConfiguration)mci.Invoke(obj, null);
-            };
+            }
 
             // Initialize Services: ReturnType(IServiceCollection), Args(null)
             var msi = methods.FirstOrDefault(m => m.ReturnParameter.ParameterType == typeof(IServiceCollection) && m.GetParameters().Length == 0);
@@ -130,21 +130,21 @@ namespace Grapevine
 
             // Configure Services: ReturnType(void), Arg[0](IServiceCollection)
             var mcs = methods.Where(m => m.ReturnParameter.ParameterType == typeof(void) && m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType == typeof(IServiceCollection));
-            Action<IServiceCollection> configureServices = (s) =>
+            void configureServices(IServiceCollection s)
             {
                 if (!mcs.Any()) return;
                 foreach (var method in mcs) method.Invoke(obj, new object[] { s });
-            };
+            }
 
             // Configure Server: ReturnType(void), Arg[0](IRestServer)
             var mcr = methods.Where(m => m.ReturnParameter.ParameterType == typeof(void) && m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType == typeof(IRestServer));
-            Action<IRestServer> configureServer = (s) =>
+            void configureServer(IRestServer s)
             {
                 if (!mcr.Any()) return;
                 foreach (var method in mcr) method.Invoke(obj, new object[] { s });
-            };
+            }
 
-            return new RestServerBuilder(serviceInitializer.Invoke(), configInitializer.Invoke(), configureServices, configureServer);
+            return new RestServerBuilder(serviceInitializer.Invoke(), configInitializer(), configureServices, configureServer);
         }
 
         private static IConfiguration GetDefaultConfiguration()

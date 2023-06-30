@@ -5,6 +5,8 @@
     <IsPackable>false</IsPackable>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>grapevinetests.snk</AssemblyOriginatorKeyFile>
+    <LangVersion>latest</LangVersion>
+    <NoWarn>1701;1702;IDE0063</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

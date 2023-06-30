@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Grapevine
@@ -36,13 +38,11 @@ namespace Grapevine
         {
             contentEncoding = string.Empty;
 
-            foreach (var encoding in encodings)
+            if (encodings.Any(CompressionDelegates.ContainsKey))
             {
-                if (CompressionDelegates.ContainsKey(encoding))
-                {
-                    contentEncoding = encoding;
-                    return CompressionDelegates[encoding];
-                }
+                string enc = encodings.First(CompressionDelegates.ContainsKey);
+                contentEncoding = enc;
+                return CompressionDelegates[enc];
             }
 
             if (identityForbidden) return NotAcceptableCompressionDelegate;
@@ -52,22 +52,26 @@ namespace Grapevine
         public static async Task<byte[]> GzipAsyncCompressionDelegateFastest(byte[] contents)
         {
             using (var ms = new MemoryStream())
-            using (var gzip = new GZipStream(ms, CompressionLevel.Fastest))
             {
-                await gzip.WriteAsync(contents, 0, contents.Length);
-                gzip.Close();
-                return ms.ToArray();
+                using (var gzip = new GZipStream(ms, CompressionLevel.Fastest))
+                {
+                    await gzip.WriteAsync(contents, 0, contents.Length);
+                    gzip.Close();
+                    return ms.ToArray();
+                }
             }
         }
 
         public static async Task<byte[]> GzipAsyncCompressionDelegateOptimal(byte[] contents)
         {
             using (var ms = new MemoryStream())
-            using (var gzip = new GZipStream(ms, CompressionLevel.Optimal))
             {
-                await gzip.WriteAsync(contents, 0, contents.Length);
-                gzip.Close();
-                return ms.ToArray();
+                using (var gzip = new GZipStream(ms, CompressionLevel.Optimal))
+                {
+                    await gzip.WriteAsync(contents, 0, contents.Length);
+                    gzip.Close();
+                    return ms.ToArray();
+                }
             }
         }
 

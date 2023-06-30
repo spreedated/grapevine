@@ -9,8 +9,8 @@ namespace Grapevine.Client
     /// </summary>
     public class Cookies : Dictionary<string, string>
     {
-        private static char[] _invalidNameChars = @"()<>@,;:\/[]?={}""".ToCharArray();
-        private static char[] _invalidValueChars = @",;\""".ToCharArray();
+        private readonly static char[] _invalidNameChars = @"()<>@,;:\/[]?={}""".ToCharArray();
+        private readonly static char[] _invalidValueChars = @",;\""".ToCharArray();
 
         public new string this[string key]
         {
@@ -44,12 +44,12 @@ namespace Grapevine.Client
 
         public override string ToString()
         {
-            return Count <= 0
+            return this.Count <= 0
                 ? string.Empty
-                : string.Join("; ", (from key in Keys let value = base[key] select $"{key}={Uri.EscapeDataString(value)}").ToArray());
+                : string.Join("; ", (from key in this.Keys let value = base[key] select $"{key}={Uri.EscapeDataString(value)}").ToArray());
         }
 
-        private string ValidateName(string name)
+        private static string ValidateName(string name)
         {
             if (name.HasWhiteSpace() || name.Contains(_invalidNameChars))
                 throw new ArgumentOutOfRangeException($"Invalid cookie name {name}");
@@ -57,7 +57,7 @@ namespace Grapevine.Client
             return name;
         }
 
-        private string ValidateValue(string value)
+        private static string ValidateValue(string value)
         {
             if (value.HasWhiteSpace() || value.Contains(_invalidValueChars))
                 throw new ArgumentOutOfRangeException($"Invalid cookie value {value}");

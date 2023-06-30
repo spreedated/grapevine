@@ -50,19 +50,18 @@ namespace Grapevine
 
         #region Static Initialization
 
-        private static readonly Dictionary<string, ContentType> _contentTypes = new Dictionary<string, ContentType>();
+        private static readonly Dictionary<string, ContentType> _contentTypes = new();
 
-        private static readonly Dictionary<string, ContentType> _extensions = new Dictionary<string, ContentType>();
+        private static readonly Dictionary<string, ContentType> _extensions = new();
 
         static ContentType()
         {
             var ct = typeof(ContentType);
-            var fields = typeof(ContentType).GetFields(BindingFlags.Public | BindingFlags.Static).ToList();
+            var fields = ct.GetFields(BindingFlags.Public | BindingFlags.Static).ToList();
 
             foreach (var field in fields)
             {
-                var contentType = field.GetValue(null) as ContentType;
-                if (contentType == null) return;
+                if (field.GetValue(null) is not ContentType contentType) return;
 
                 _contentTypes.Add(contentType, contentType);
                 _extensions.Add(field.Name.ToLower(), contentType);

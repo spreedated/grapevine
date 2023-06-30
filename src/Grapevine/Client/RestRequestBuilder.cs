@@ -12,8 +12,8 @@ namespace Grapevine.Client
 
         public HttpContent Content
         {
-            get { return Request.Content; }
-            set { Request.Content = value; }
+            get { return this.Request.Content; }
+            set { this.Request.Content = value; }
         }
 
         public Cookies Cookies { get; } = new Cookies();
@@ -28,33 +28,33 @@ namespace Grapevine.Client
 
         public TimeSpan Timeout
         {
-            get { return _client.Timeout; }
-            set { _client.Timeout = value; }
+            get { return this._client.Timeout; }
+            set { this._client.Timeout = value; }
         }
 
         internal RestRequestBuilder(HttpClient client)
         {
-            _client = client;
+            this._client = client;
         }
 
         public async Task<HttpResponseMessage> SendAsync(HttpMethod method, CancellationToken? token = null)
         {
-            Request.Method = method;
+            this.Request.Method = method;
 
-            Headers["Cookie"] = (Headers.ContainsKey("Cookie"))
-                ? string.Join("; ", new string[] { Headers["Cookies"], Cookies.ToString() })
-                : Cookies.ToString();
+            this.Headers["Cookie"] = (this.Headers.ContainsKey("Cookie"))
+                ? string.Join("; ", this.Headers["Cookies"], this.Cookies.ToString())
+                : this.Cookies.ToString();
 
-            foreach (var item in Headers) Request.Headers.Add(item.Key, item.Value);
+            foreach (var item in this.Headers) this.Request.Headers.Add(item.Key, item.Value);
 
-            if (Request.Content is MultipartContent) Request.Headers.ExpectContinue = false;
+            if (this.Request.Content is MultipartContent) this.Request.Headers.ExpectContinue = false;
 
-            Request.RequestUri = (!string.IsNullOrWhiteSpace(_client.BaseAddress?.ToString()))
-                ? new Uri($"{_client.BaseAddress.ToString().TrimEnd('/')}/{Route.TrimStart('/')}{QueryParams}")
-                : new Uri($"{Route}{QueryParams}");
+            this.Request.RequestUri = (!string.IsNullOrWhiteSpace(this._client.BaseAddress?.ToString()))
+                ? new Uri($"{this._client.BaseAddress.ToString().TrimEnd('/')}/{this.Route.TrimStart('/')}{this.QueryParams}")
+                : new Uri($"{this.Route}{this.QueryParams}");
 
-            token = token ?? CancellationToken.None;
-            return await _client.SendAsync(Request, HttpCompletionOption.ResponseContentRead, token.Value).ConfigureAwait(false);
+            token ??= CancellationToken.None;
+            return await this._client.SendAsync(this.Request, HttpCompletionOption.ResponseContentRead, token.Value).ConfigureAwait(false);
         }
     }
 }

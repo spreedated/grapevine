@@ -25,6 +25,8 @@
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>grapevine.snk</AssemblyOriginatorKeyFile>
+    <LangVersion>latest</LangVersion>
+      <NoWarn>1701;1702;IDE0063</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
