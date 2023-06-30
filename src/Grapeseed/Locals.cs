@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 
 namespace Grapevine
 {
-#if NETSTANDARD2_0
+#if NETSTANDARD2_0 || NET472
     public class Locals : ConcurrentDictionary<object, object> { }
 #else
     #nullable enable

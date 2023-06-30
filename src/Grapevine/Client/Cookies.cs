@@ -28,7 +28,7 @@ namespace Grapevine.Client
             base.Add(ValidateName(key), ValidateValue(value.ToString()));
         }
 
-#if !NETSTANDARD2_0
+#if !NETSTANDARD2_0 && !NET472
 
         public new bool TryAdd(string key, string value)
         {
