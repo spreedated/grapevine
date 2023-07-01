@@ -16,9 +16,20 @@ namespace Grapevine
         /// <returns>object of type &lt;T&gt;</returns>
         public static T GetValue<T>(this NameValueCollection collection, string key)
         {
-            if (collection == null) throw new ArgumentNullException(nameof(collection), "Missing collection");
-            if (key == null) throw new ArgumentNullException(nameof(key), "Missing key");
-            if (collection[key] == null) throw new ArgumentOutOfRangeException(nameof(key), $"Key {key} not found in collection");
+            if (collection == null)
+            {
+                throw new ArgumentNullException(nameof(collection), "Missing collection");
+            }
+
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key), "Missing key");
+            }
+
+            if (collection[key] == null)
+            {
+                throw new ArgumentOutOfRangeException(nameof(key), $"Key {key} not found in collection");
+            }
 
             var value = collection[key];
             var converter = TypeDescriptor.GetConverter(typeof(T));
@@ -39,6 +50,10 @@ namespace Grapevine
         {
             try
             {
+                if (key == "Accept-Encoding" && collection[key] == null)
+                {
+                    return defaultValue;
+                }
                 return collection.GetValue<T>(key);
             }
             catch (Exception)
