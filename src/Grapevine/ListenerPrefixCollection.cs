@@ -20,7 +20,15 @@ namespace Grapevine
             this.PrefixCollection = prefixes;
         }
 
-        public void Add(string item) => this.PrefixCollection.Add(item);
+        public void Add(string item)
+        {
+            if (!item.EndsWith("/"))
+            {
+                item += "/";
+            }
+
+            this.PrefixCollection.Add(item);
+        }
 
         public void Clear() => this.PrefixCollection.Clear();
 
