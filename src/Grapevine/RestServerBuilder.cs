@@ -1,3 +1,4 @@
+using Grapevine.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -37,6 +38,34 @@ namespace Grapevine
             this.Configuration = configuration ?? GetDefaultConfiguration();
             this.ConfigureServices = configureServices;
             this.ConfigureServer = configureServer;
+        }
+
+        /// <summary>
+        /// Build a default server with the specified prefixes
+        /// </summary>
+        /// <param name="prefixes"></param>
+        /// <returns></returns>
+        public static IRestServer BuildDefaultServer(params string[] prefixes)
+        {
+            return BuildDefaultServer(prefixes.Select(Prefix.Parse).ToArray());
+        }
+
+        /// <summary>
+        /// Build a default server with the specified prefixes
+        /// </summary>
+        /// <param name="prefixes"></param>
+        /// <returns></returns>
+        public static IRestServer BuildDefaultServer(params Prefix[] prefixes)
+        {
+            IRestServer restServer = RestServerBuilder.UseDefaults().Build();
+
+            restServer.Prefixes.Clear();
+            foreach (Prefix p in prefixes)
+            {
+                restServer.Prefixes.Add(p.ToString());
+            }
+
+            return restServer;
         }
 
         public IRestServer Build()
