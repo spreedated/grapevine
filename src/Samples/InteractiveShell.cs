@@ -1,32 +1,32 @@
+using Grapevine;
 using System;
 using System.Threading;
-using Grapevine;
 
 namespace Samples
 {
     public class InteractiveShell
     {
         private IRestServer _server;
-        private bool _detached;
+        private readonly bool _detached;
 
         public InteractiveShell(bool detached = true)
         {
-            _detached = detached;
+            this._detached = detached;
         }
 
         public void Run(IRestServer server)
         {
-            _server = server;
+            this._server = server;
 
-            if (_detached)
-                new Thread(ShellRunner).Start();
+            if (this._detached)
+                new Thread(this.ShellRunner).Start();
             else
-                ShellRunner();
+                this.ShellRunner();
         }
 
         public void ShellRunner()
         {
-            while (!_server.IsListening) Thread.Sleep(1000);
+            while (!this._server.IsListening) Thread.Sleep(1000);
 
             var exit = false;
             var exitCmd = nameof(exit).ToLower();
@@ -34,7 +34,7 @@ namespace Samples
             Console.WriteLine("This is the interactive shell. Use it to communicate with the running application.");
             Console.WriteLine($"Type your command below. Type {exitCmd} to exit.");
 
-            while (_server.IsListening && !exit)
+            while (this._server.IsListening && !exit)
             {
                 Console.WriteLine();
                 var input = GetCommandInput("Shell is not currently configured.");
@@ -45,7 +45,7 @@ namespace Samples
             Console.WriteLine("You have exited the interactive shell. Good day!");
         }
 
-        public string GetCommandInput(string prompt, bool leadingLineBreak = false)
+        public static string GetCommandInput(string prompt, bool leadingLineBreak = false)
         {
             while (true)
             {

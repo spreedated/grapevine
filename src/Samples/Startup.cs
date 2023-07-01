@@ -1,11 +1,11 @@
-using System;
-using System.IO;
 using Grapevine;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using Samples.Clients;
+using System;
+using System.IO;
 
 namespace Samples
 {
@@ -13,11 +13,11 @@ namespace Samples
     {
         public IConfiguration Configuration { get; private set; }
 
-        private string _serverPort = PortFinder.FindNextLocalOpenPort(1234);
+        private readonly string _serverPort = PortFinder.FindNextLocalOpenPort(1234);
 
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            this.Configuration = configuration;
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -25,7 +25,7 @@ namespace Samples
             services.AddLogging(loggingBuilder =>
             {
                 loggingBuilder.ClearProviders();
-                loggingBuilder.AddNLog(new NLogLoggingConfiguration(Configuration.GetSection("NLog")));
+                loggingBuilder.AddNLog(new NLogLoggingConfiguration(this.Configuration.GetSection("NLog")));
             });
 
             services.AddHttpClient<GitHubClient>(c =>
@@ -46,7 +46,7 @@ namespace Samples
             server.ContentFolders.Add(folderPath);
             server.UseContentFolders();
 
-            server.Prefixes.Add($"http://localhost:{_serverPort}/");
+            server.Prefixes.Add($"http://localhost:{this._serverPort}/");
 
             /* Configure server to auto parse application/x-www-for-urlencoded data*/
             server.AutoParseFormUrlEncodedData();

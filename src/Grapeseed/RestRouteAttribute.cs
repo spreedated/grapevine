@@ -26,18 +26,18 @@ namespace Grapevine
 
         public RestRouteAttribute()
         {
-            HttpMethod = HttpMethod.Any;
+            this.HttpMethod = HttpMethod.Any;
         }
 
         public RestRouteAttribute(string httpMethod)
         {
-            HttpMethod = httpMethod;
+            this.HttpMethod = httpMethod;
         }
 
         public RestRouteAttribute(string httpMethod, string routeTemplate)
         {
-            HttpMethod = httpMethod;
-            RouteTemplate = routeTemplate;
+            this.HttpMethod = httpMethod;
+            this.RouteTemplate = routeTemplate;
         }
     }
 
@@ -49,8 +49,8 @@ namespace Grapevine
 
         public HeaderAttribute(string key, string value)
         {
-            Key = key;
-            Value = new Regex(value);
+            this.Key = key;
+            this.Value = new(value);
         }
     }
 
@@ -58,7 +58,7 @@ namespace Grapevine
     {
         public static object[] GenerateRouteConstructorArguments(this RestRouteAttribute attribute, MethodInfo methodInfo, string basePath = null)
         {
-            var args = new object[6];
+            object[] args = new object[6];
 
             if (!methodInfo.IsStatic)
             {

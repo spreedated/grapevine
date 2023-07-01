@@ -1,8 +1,8 @@
+using Grapevine.Middleware;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Grapevine.Middleware;
 
 namespace Grapevine
 {
@@ -10,10 +10,10 @@ namespace Grapevine
     {
         public static void Run(this IRestServer server)
         {
-            ManualResetEvent manualResetEvent = new ManualResetEvent(true);
+            ManualResetEvent manualResetEvent = new(true);
 
-            ServerEventHandler onStart = (s) => manualResetEvent.Reset();
-            ServerEventHandler onStop = (s) => manualResetEvent.Set();
+            void onStart(IRestServer s) => manualResetEvent.Reset();
+            void onStop(IRestServer s) => manualResetEvent.Set();
 
             server.AfterStarting += onStart;
             server.AfterStopping += onStop;
@@ -27,13 +27,13 @@ namespace Grapevine
 
         public static void Run(this IRestServer server, CancellationToken token)
         {
-            ManualResetEventSlim manualResetEvent = new ManualResetEventSlim(true);
+            ManualResetEventSlim manualResetEvent = new(true);
 
-            ServerEventHandler onStop = (s) =>
+            void onStop(IRestServer s)
             {
                 if (!token.IsCancellationRequested)
                     CancellationTokenSource.CreateLinkedTokenSource(token).Cancel();
-            };
+            }
 
             server.AfterStopping += onStop;
 

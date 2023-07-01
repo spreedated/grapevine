@@ -1,8 +1,8 @@
+using Grapevine;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using Grapevine;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Samples.Resources
 {

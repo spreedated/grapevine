@@ -1,8 +1,8 @@
+using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Shouldly;
 using Xunit;
 
 namespace Grapevine.Tests

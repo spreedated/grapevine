@@ -1,8 +1,8 @@
+using FluentHttpClient;
+using Grapevine;
 using System.Collections.Specialized;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Grapevine;
-using Grapevine.Client;
 
 namespace Samples.Clients
 {
@@ -13,7 +13,7 @@ namespace Samples.Clients
 
         public GitHubClient(HttpClient client)
         {
-            _client = client;
+            this._client = client;
         }
 
         [RestRoute("Get", "/issues/{owner}/{repo}", Description = "Returns the JSON for the list of open issues returned for the specified repository")]
@@ -34,7 +34,7 @@ namespace Samples.Clients
 
             await context.Response.SendResponseAsync
             (
-                await _client
+                await this._client
                     .UsingRoute($"/repos/{owner}/{repo}/issues")
                     .WithQueryParams(query)
                     .GetAsync()

@@ -1,10 +1,10 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
 
 namespace Grapevine
 {
@@ -23,7 +23,7 @@ namespace Grapevine
             get
             {
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(a => a.GetName().Name != "Grapevine" && a.GetName().Name != "Grapeseed" && !a.GetName().Name.StartsWith(IgnoredAssemblies.ToArray()))
+                    .Where(a => a.GetName().Name != "Grapevine" && a.GetName().Name != "Grapeseed" && !a.GetName().Name.StartsWith(this.IgnoredAssemblies.ToArray()))
 #if NETSTANDARD
                     .Where(a => !a.GlobalAssemblyCache)
 #endif
@@ -62,79 +62,84 @@ namespace Grapevine
 
         public RouteScanner(ILogger<IRouteScanner> logger)
         {
-            Logger = logger ?? DefaultLogger.GetInstance<IRouteScanner>();
+            this.Logger = logger ?? DefaultLogger.GetInstance<IRouteScanner>();
         }
 
         public override IList<IRoute> Scan(string basePath = null)
         {
-            var basepath = (basePath ?? BasePath).SanitizePath();
+            var basepath = (basePath ?? this.BasePath).SanitizePath();
 
-            var routes = new List<IRoute>();
-            Logger.LogTrace("Begin Global Route Scanning");
+            List<IRoute> routes = new();
+            this.Logger.LogTrace("Begin Global Route Scanning");
 
-            foreach (var assembly in Assemblies)
+            foreach (var assembly in this.Assemblies)
             {
                 try
                 {
-                    routes.AddRange(Scan(assembly, basepath));
+                    routes.AddRange(this.Scan(assembly, basepath));
                 }
                 catch (ReflectionTypeLoadException ex)
                 {
                     var message = $"Exception occurred when scanning for routes";
                     foreach (var loaderEx in ex.LoaderExceptions)
                     {
-                        Logger.LogDebug(loaderEx, message);
+                        this.Logger.LogDebug(loaderEx, message);
                     }
                 }
             }
 
-            Logger.LogTrace($"Global Route Scanning Complete: {routes.Count} total routes found");
+            this.Logger.LogTrace($"Global Route Scanning Complete: {routes.Count} total routes found");
 
             return routes;
         }
 
         public override IList<IRoute> Scan(Assembly assembly, string basePath = null)
         {
-            var basepath = (basePath ?? BasePath).SanitizePath();
-            var routes = new List<IRoute>();
+            var basepath = (basePath ?? this.BasePath).SanitizePath();
+            List<IRoute> routes = new();
 
             var name = assembly.GetName().FullName;
-            Logger.LogTrace($"Scanning assembly {name} for routes");
+            this.Logger.LogTrace($"Scanning assembly {name} for routes");
 
             try
             {
                 foreach (var type in GetQualifiedTypes(assembly))
-                    routes.AddRange(Scan(type, basepath));
+                    routes.AddRange(this.Scan(type, basepath));
             }
             catch (ReflectionTypeLoadException ex)
             {
                 var message = $"Exception occurred when scanning assembly {name} for routes";
                 foreach (var loaderEx in ex.LoaderExceptions)
-                    Logger.LogDebug(loaderEx, message);
+                    this.Logger.LogDebug(loaderEx, message);
             }
 
-            Logger.LogTrace($"Scan of assembly {name} complete: {routes.Count} total routes found");
+            this.Logger.LogTrace($"Scan of assembly {name} complete: {routes.Count} total routes found");
 
             return routes;
         }
 
         public override IList<IRoute> Scan(Type type, string basePath = null)
         {
-            var routes = new List<IRoute>();
-            Logger.LogTrace($"Scanning type {type.Name} for routes");
+            List<IRoute> routes = new();
+            this.Logger.LogTrace($"Scanning type {type.Name} for routes");
 
             var attribute = type.GetCustomAttributes(typeof(RestResourceAttribute))
                 .Cast<RestResourceAttribute>().FirstOrDefault();
 
-            var basepath = (basePath ?? BasePath).SanitizePath();
+            if (attribute == null)
+            {
+                return routes;
+            }
+
+            var basepath = (basePath ?? this.BasePath).SanitizePath();
             basepath = (!string.IsNullOrWhiteSpace(basepath))
-                ? string.Join("/", new string[] { basepath, attribute.BasePath.SanitizePath() })
+                ? string.Join("/", basepath, attribute.BasePath.SanitizePath())
                 : attribute.BasePath.SanitizePath();
 
             foreach (var method in GetQualifiedMethods(type))
             {
                 if (type.IsAbstract && !method.IsStatic) continue;
-                routes.AddRange(Scan(method, basepath));
+                routes.AddRange(this.Scan(method, basepath));
             }
 
             if (routes.Count > 0 && !type.IsAbstract)
@@ -142,24 +147,27 @@ namespace Grapevine
                 var lifetime = type.IsDefined(typeof(ResourceLifetimeAttribute), false)
                     ? type.GetCustomAttributes(typeof(ResourceLifetimeAttribute))
                         .Cast<ResourceLifetimeAttribute>()
-                        .FirstOrDefault().ServiceLifetime
+                        .FirstOrDefault()?.ServiceLifetime
                     : ServiceLifetime.Scoped;
 
-                Services.TryAdd(new ServiceDescriptor(type, type, lifetime));
+                if (lifetime != null)
+                {
+                    this.Services.TryAdd(new ServiceDescriptor(type, type, (ServiceLifetime)lifetime));
+                }
             }
 
-            Logger.LogTrace($"Scan of type {type.Name} complete: {routes.Count} total routes found");
+            this.Logger.LogTrace($"Scan of type {type.Name} complete: {routes.Count} total routes found");
             return routes;
         }
 
         public override IList<IRoute> Scan(MethodInfo methodInfo, string basePath = null)
         {
-            var basepath = (basePath ?? BasePath).SanitizePath();
+            var basepath = (basePath ?? this.BasePath).SanitizePath();
 
-            var routes = new List<IRoute>();
+            List<IRoute> routes = new();
             var type = methodInfo.ReflectedType;
 
-            Logger.LogTrace($"Scanning method {methodInfo.Name} for routes");
+            this.Logger.LogTrace($"Scanning method {methodInfo.Name} for routes");
 
             var headers = GetAttributes<HeaderAttribute>(methodInfo);
 
@@ -180,10 +188,10 @@ namespace Grapevine
                 // 4. Add route to routing table
                 routes.Add(route);
 
-                Logger.LogTrace($"Generated route {route}");
+                this.Logger.LogTrace($"Generated route {route}");
             }
 
-            Logger.LogTrace($"Scan of method {methodInfo.Name} complete: {routes.Count} total routes found");
+            this.Logger.LogTrace($"Scan of method {methodInfo.Name} complete: {routes.Count} total routes found");
 
             return routes;
         }

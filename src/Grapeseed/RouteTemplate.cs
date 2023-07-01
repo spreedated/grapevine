@@ -1,3 +1,5 @@
+#pragma warning disable S3220 // Method calls should not resolve ambiguously to overloads with "params" parameters
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,38 +23,38 @@ namespace Grapevine
 
     public class RouteTemplate : IRouteTemplate
     {
-        private static readonly Regex Default = new Regex(@"^.*$");
+        private static readonly Regex Default = new(@"^.*$");
 
-        public Regex Pattern { get; set; } = new Regex(@"^.*$");
+        public Regex Pattern { get; set; } = new(@"^.*$");
 
-        public List<string> PatternKeys { get; set; } = new List<string>();
+        public List<string> PatternKeys { get; set; } = new();
 
         public RouteTemplate() { }
 
         public RouteTemplate(string pattern)
         {
-            Pattern = ConvertToRegex(pattern, out var patternKeys);
-            PatternKeys = patternKeys;
+            this.Pattern = ConvertToRegex(pattern, out var patternKeys);
+            this.PatternKeys = patternKeys;
         }
 
         public RouteTemplate(Regex pattern, List<string> patternKeys = null)
         {
-            Pattern = pattern;
-            if (patternKeys != null) PatternKeys = patternKeys;
+            this.Pattern = pattern;
+            if (patternKeys != null) this.PatternKeys = patternKeys;
         }
 
-        public bool Matches(string endpoint) => Pattern.IsMatch(endpoint);
+        public bool Matches(string endpoint) => this.Pattern.IsMatch(endpoint);
 
         public IDictionary<string, string> ParseEndpoint(string endpoint)
         {
-            var parsed = new Dictionary<string, string>();
+            Dictionary<string, string> parsed = new();
             var idx = 0;
 
-            var matches = Pattern.Matches(endpoint)[0].Groups;
+            var matches = this.Pattern.Matches(endpoint)[0].Groups;
             for (int i = 1; i < matches.Count; i++)
             {
-                var key = (PatternKeys?.Count > 0 && PatternKeys?.Count > idx)
-                    ? PatternKeys[idx]
+                var key = (this.PatternKeys?.Count > 0 && this.PatternKeys?.Count > idx)
+                    ? this.PatternKeys[idx]
                     : $"p{idx}";
 
                 parsed.Add(key, matches[i].Value);
@@ -64,15 +66,15 @@ namespace Grapevine
 
         public static Regex ConvertToRegex(string pattern, out List<string> patternKeys)
         {
-            patternKeys = new List<string>();
+            patternKeys = new();
 
             if (string.IsNullOrEmpty(pattern)) return Default;
-            if (pattern.StartsWith("^")) return new Regex(pattern);
+            if (pattern.StartsWith("^")) return new(pattern);
 
-            var builder = new StringBuilder("(?i)^");
+            StringBuilder builder = new("(?i)^");
             var sections = pattern.SanitizePath() // Ensures the string begins with '/'
                 .TrimEnd('$')                     // Removes any trailing '$'
-                .Split(new char[] { '{', '}' });  // splits into sections
+                .Split('{', '}');  // splits into sections
 
             for (var i = 0; i < sections.Length; i++)
             {
@@ -90,8 +92,8 @@ namespace Grapevine
                 }
             }
 
-            builder.Append("$");
-            return new Regex(builder.ToString());
+            builder.Append('$');
+            return new(builder.ToString());
         }
     }
 
@@ -99,20 +101,23 @@ namespace Grapevine
     {
         public static readonly string DefaultPattern = "([^/]+)";
 
-        private static readonly Dictionary<string, RouteConstraintResolver> _resolvers = new Dictionary<string, RouteConstraintResolver>();
-
-        private static readonly List<string> _protectedKeys;
-
-        static RouteConstraints()
+        private static readonly Dictionary<string, RouteConstraintResolver> _resolvers = new()
         {
-            _resolvers.Add("alpha", AlphaResolver);
-            _resolvers.Add("alphanum", AlphaNumericResolver);
-            _resolvers.Add("guid", GuidResolver);
-            _resolvers.Add("num", NumericResolver);
-            _resolvers.Add("string", StringResolver);
+            { "alpha", AlphaResolver },
+            { "alphanum", AlphaNumericResolver },
+            { "guid", GuidResolver },
+            { "num", NumericResolver },
+            { "string", StringResolver }
+        };
 
-            _protectedKeys = _resolvers.Keys.ToList();
-        }
+        private static readonly string[] _protectedKeys = new string[]
+        {
+            "alpha",
+            "alphanum",
+            "guid",
+            "num",
+            "string"
+        };
 
         public static void AddResolver(string key, RouteConstraintResolver resolver)
         {
@@ -120,15 +125,29 @@ namespace Grapevine
             _resolvers[key] = resolver;
         }
 
+        private static string GetContraintWithRoundBrackets(IList<string> constraints)
+        {
+            if (constraints[0].Contains('('))
+            {
+                return constraints[0];
+            }
+
+            if (constraints.Count > 1 && constraints[1].Contains('('))
+            {
+                return constraints[1];
+            }
+
+            return string.Empty;
+        }
+
         public static string Resolve(List<string> constraints)
         {
-            if (constraints.Count == 0) return DefaultPattern;
+            if (constraints == null || !constraints.Any())
+            {
+                return DefaultPattern;
+            }
 
-            var constraint = (constraints[0].Contains('('))
-                ? constraints[0]
-                : (constraints.Count > 1 && constraints[1].Contains('('))
-                    ? constraints[1]
-                    : string.Empty;
+            string constraint = GetContraintWithRoundBrackets(constraints);
 
             var resolver = _resolvers.ContainsKey(constraints[0])
                 ? _resolvers[constraints[0]]
@@ -169,29 +188,20 @@ namespace Grapevine
         public static string LengthResolver(string args)
         {
             if (string.IsNullOrWhiteSpace(args)) return "+";
-            var sections = args.Split(new char[] { '(', ')' });
+            var sections = args.Split('(', ')');
 
             if (sections.Length < 2) throw new ArgumentException($"Length parameters not specified in {args}");
-
-            var length = string.Empty;
             var range = sections[1].Split(',');
 
-            switch (sections[0].ToLower())
+            string length = sections[0].ToLower() switch
             {
-                case "minlength":
-                    length = "{" + Int32.Parse(range[0]) + ",}";
-                    break;
-                case "maxlength":
-                    length = "{1," + Int32.Parse(range[0]) + "}";
-                    break;
-                case "length":
-                    length = (range.Length == 2)
-                        ? "{" + Int32.Parse(range[0]) + "," + Int32.Parse(range[1]) + "}"
-                        : "{" + Int32.Parse(range[0]) + "}";
-                    break;
-                default:
-                    throw new ArgumentException($"Invalid length parameter specified in {args}");
-            }
+                "minlength" => "{" + Int32.Parse(range[0]) + ",}",
+                "maxlength" => "{1," + Int32.Parse(range[0]) + "}",
+                "length" => (range.Length == 2)
+                                        ? "{" + Int32.Parse(range[0]) + "," + Int32.Parse(range[1]) + "}"
+                                        : "{" + Int32.Parse(range[0]) + "}",
+                _ => throw new ArgumentException($"Invalid length parameter specified in {args}"),
+            };
 
             return length;
         }

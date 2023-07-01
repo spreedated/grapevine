@@ -1,8 +1,8 @@
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading;
-using Microsoft.Extensions.Logging;
 
 namespace Grapevine
 {
@@ -93,62 +93,62 @@ namespace Grapevine
             if (!HttpListener.IsSupported)
                 throw new PlatformNotSupportedException("Windows Server 2003 (or higher) or Windows XP SP2 (or higher) is required to use instances of this class.");
 
-            Router = router ?? new Router(DefaultLogger.GetInstance<IRouter>());
-            RouteScanner = scanner ?? new RouteScanner(DefaultLogger.GetInstance<IRouteScanner>());
-            Logger = logger ?? DefaultLogger.GetInstance<IRestServer>();
+            this.Router = router ?? new Router(DefaultLogger.GetInstance<IRouter>());
+            this.RouteScanner = scanner ?? new RouteScanner(DefaultLogger.GetInstance<IRouteScanner>());
+            this.Logger = logger ?? DefaultLogger.GetInstance<IRestServer>();
 
-            if (Router is RouterBase)
-                (Router as RouterBase).HandleHttpListenerExceptions();
+            if (this.Router is RouterBase)
+                (this.Router as RouterBase).HandleHttpListenerExceptions();
 
-            RouteScanner.Services = Router.Services;
+            this.RouteScanner.Services = this.Router.Services;
 
-            Listener = new HttpListener();
-            Prefixes = new ListenerPrefixCollection(Listener.Prefixes);
-            RequestHandler = new Thread(RequestListenerAsync);
+            this.Listener = new HttpListener();
+            this.Prefixes = new ListenerPrefixCollection(this.Listener.Prefixes);
+            this.RequestHandler = new Thread(this.RequestListenerAsync);
         }
 
         public override void Dispose()
         {
-            if (IsDisposed) return;
+            if (this.IsDisposed) return;
 
             try
             {
-                Stop();
-                Listener.Close();
-                TokenSource?.Dispose();
+                this.Stop();
+                this.Listener.Close();
+                this.TokenSource?.Dispose();
             }
             finally
             {
-                IsDisposed = true;
+                this.IsDisposed = true;
             }
         }
 
         public override void Start()
         {
-            if (IsDisposed) throw new ObjectDisposedException(GetType().FullName);
-            if (IsListening || IsStarting || IsStopping) return;
-            IsStarting = true;
+            if (this.IsDisposed) throw new ObjectDisposedException(this.GetType().FullName);
+            if (this.IsListening || this.IsStarting || this.IsStopping) return;
+            this.IsStarting = true;
 
             var exceptionWasThrown = false;
 
             try
             {
                 // 1. Reset CancellationTokenSource
-                TokenSource?.Dispose();
-                TokenSource = new CancellationTokenSource();
+                this.TokenSource?.Dispose();
+                this.TokenSource = new CancellationTokenSource();
 
                 // 2. Execute BeforeStarting event handlers
                 BeforeStarting?.Invoke(this);
 
                 // 3. Optionally autoscan for routes
-                if (Router.RoutingTable.Count == 0 && Options.EnableAutoScan)
-                    Router.Register(RouteScanner.Scan());
+                if (this.Router.RoutingTable.Count == 0 && this.Options.EnableAutoScan)
+                    this.Router.Register(this.RouteScanner.Scan());
 
                 // 4. Configure and start the listener
-                Listener.Start();
+                this.Listener.Start();
 
                 // 5. Start the request handler thread
-                RequestHandler.Start();
+                this.RequestHandler.Start();
 
                 // 6. Execute AfterStarting event handlers
                 AfterStarting?.Invoke(this);
@@ -165,39 +165,39 @@ namespace Grapevine
                 var message = $"One or more ports are already in use by another application.";
                 var exception = new ArgumentException(message, hl);
 
-                Logger.LogCritical(exception, message);
+                this.Logger.LogCritical(exception, message);
                 throw exception;
             }
             catch (Exception e)
             {
                 exceptionWasThrown = true;
 
-                Logger.LogCritical(e, "An unexpected error occurred when attempting to start the server");
+                this.Logger.LogCritical(e, "An unexpected error occurred when attempting to start the server");
                 throw;
             }
             finally
             {
                 if (exceptionWasThrown)
                 {
-                    Listener.Stop();
-                    TokenSource.Cancel();
+                    this.Listener.Stop();
+                    this.TokenSource.Cancel();
                 }
 
-                IsStarting = false;
+                this.IsStarting = false;
 
                 if (this.ContentFolders.Count > 0)
                 {
-                    Logger.LogInformation("Grapevine has detected that content folders have been added");
-                    Logger.LogInformation("Enable serving content from content folders with: server.UseContentFolders()");
+                    this.Logger.LogInformation("Grapevine has detected that content folders have been added");
+                    this.Logger.LogInformation("Enable serving content from content folders with: server.UseContentFolders()");
                 }
             }
         }
 
         public override void Stop()
         {
-            if (IsDisposed) throw new ObjectDisposedException(GetType().FullName);
-            if (IsStopping || IsStarting) return;
-            IsStopping = true;
+            if (this.IsDisposed) throw new ObjectDisposedException(this.GetType().FullName);
+            if (this.IsStopping || this.IsStarting) return;
+            this.IsStopping = true;
 
             try
             {
@@ -205,33 +205,33 @@ namespace Grapevine
                 BeforeStopping?.Invoke(this);
 
                 // 2. Stop the listener
-                Listener?.Stop();
+                this.Listener?.Stop();
 
                 // 3. Complete or cancel running routes
-                TokenSource?.Cancel();
+                this.TokenSource?.Cancel();
 
                 // 4. Execute AfterStopping event handlers
                 AfterStopping?.Invoke(this);
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Stopping error");
+                this.Logger.LogError(ex, "Stopping error");
                 throw;
             }
             finally
             {
-                IsStopping = false;
+                this.IsStopping = false;
             }
         }
 
         protected async void RequestListenerAsync()
         {
-            while (Listener.IsListening)
+            while (this.Listener.IsListening)
             {
                 try
                 {
-                    var context = await Listener.GetContextAsync();
-                    ThreadPool.QueueUserWorkItem(RequestHandlerAsync, context);
+                    var context = await this.Listener.GetContextAsync();
+                    ThreadPool.QueueUserWorkItem(this.RequestHandlerAsync, context);
                 }
                 catch (HttpListenerException hl) when (hl.ErrorCode == 995 && (IsStopping || !IsListening))
                 {
@@ -240,7 +240,7 @@ namespace Grapevine
                     * incoming requests during shutdown
                     */
                 }
-                catch (ObjectDisposedException) when (IsDisposed)
+                catch (ObjectDisposedException) when (this.IsDisposed)
                 {
                     /*
                     * Ignore object disposed exceptions thrown during shutdown
@@ -249,7 +249,7 @@ namespace Grapevine
                 }
                 catch (Exception e)
                 {
-                    Logger.LogDebug(e, "An unexpected error occurred while listening for incoming requests.");
+                    this.Logger.LogDebug(e, "An unexpected error occurred while listening for incoming requests.");
                 }
             }
         }
@@ -258,7 +258,7 @@ namespace Grapevine
         {
             // 1. Create context
             var context = Options.HttpContextFactory(state, TokenSource.Token);
-            Logger.LogTrace($"{context.Id} : Request Received {context.Request.Name}");
+            this.Logger.LogTrace($"{context.Id} : Request Received {context.Request.Name}");
 
             // 2. Apply global response headers
             this.ApplyGlobalResponseHeaders(context.Response.Headers);
@@ -266,24 +266,24 @@ namespace Grapevine
             // 3. Execute OnRequest event handlers
             try
             {
-                Logger.LogTrace($"{context.Id} : Invoking OnRequest Handlers for {context.Request.Name}");
-                var count = (OnRequestAsync != null) ? await OnRequestAsync.Invoke(context, this) : 0;
-                Logger.LogTrace($"{context.Id} : {count} OnRequest Handlers Invoked for {context.Request.Name}");
+                this.Logger.LogTrace($"{context.Id} : Invoking OnRequest Handlers for {context.Request.Name}");
+                var count = (this.OnRequestAsync != null) ? await this.OnRequestAsync.Invoke(context, this) : 0;
+                this.Logger.LogTrace($"{context.Id} : {count} OnRequest Handlers Invoked for {context.Request.Name}");
             }
             catch (System.Net.HttpListenerException hl) when (hl.ErrorCode == 1229)
             {
-                Logger.LogDebug($"{context.Id} : The remote connection was closed before a response could be sent for {context.Request.Name}.");
+                this.Logger.LogDebug($"{context.Id} : The remote connection was closed before a response could be sent for {context.Request.Name}.");
             }
             catch (Exception e)
             {
-                Logger.LogError(e, $"{context.Id} An exception occurred while routing request {context.Request.Name}");
+                this.Logger.LogError(e, $"{context.Id} An exception occurred while routing request {context.Request.Name}");
             }
 
             // 4. Optionally route request
             if (!context.WasRespondedTo)
             {
                 Logger.LogTrace($"{context.Id} : Routing request {context.Request.Name}");
-                ThreadPool.QueueUserWorkItem(Router.RouteAsync, context);
+                ThreadPool.QueueUserWorkItem(this.Router.RouteAsync, context);
             }
         }
     }

@@ -1,5 +1,7 @@
-using System.Net;
+#pragma warning disable IDE0060
+
 using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace Grapevine
 {
@@ -11,7 +13,7 @@ namespace Grapevine
 
             Router.DefaultErrorHandler = async (context, exception) =>
             {
-                if (exception is HttpListenerException && ((HttpListenerException)exception).ErrorCode == 1229)
+                if (exception is HttpListenerException exception1 && exception1.ErrorCode == 1229)
                 {
                     var logger = DefaultLogger.GetInstance<IRouter>();
                     logger.LogDebug("The remote connection was closed before a response could be sent.");

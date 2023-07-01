@@ -1,9 +1,9 @@
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Grapevine
 {
@@ -13,7 +13,7 @@ namespace Grapevine
 
         public bool Enabled { get; set; }
 
-        public Dictionary<string, Regex> HeaderConditions { get; } = new Dictionary<string, Regex>();
+        public Dictionary<string, Regex> HeaderConditions { get; } = new();
 
         public HttpMethod HttpMethod { get; set; }
 
@@ -23,20 +23,20 @@ namespace Grapevine
 
         protected RouteBase(HttpMethod httpMethod, IRouteTemplate routeTemplate, bool enabled, string name, string description)
         {
-            HttpMethod = httpMethod;
-            RouteTemplate = routeTemplate;
-            Name = name;
-            Description = description;
-            Enabled = enabled;
+            this.HttpMethod = httpMethod;
+            this.RouteTemplate = routeTemplate;
+            this.Name = name;
+            this.Description = description;
+            this.Enabled = enabled;
         }
 
         public abstract Task InvokeAsync(IHttpContext context);
 
         public virtual bool IsMatch(IHttpContext context)
         {
-            if (!Enabled || !context.Request.HttpMethod.Equivalent(HttpMethod) || !RouteTemplate.Matches(context.Request.Endpoint)) return false;
+            if (!this.Enabled || !context.Request.HttpMethod.Equivalent(this.HttpMethod) || !this.RouteTemplate.Matches(context.Request.Endpoint)) return false;
 
-            foreach (var condition in HeaderConditions)
+            foreach (var condition in this.HeaderConditions)
             {
                 var value = context.Request.Headers.Get(condition.Key) ?? string.Empty;
                 if (condition.Value.IsMatch(value)) continue;
@@ -48,7 +48,7 @@ namespace Grapevine
 
         public virtual IRoute WithHeader(string header, Regex pattern)
         {
-            HeaderConditions[header] = pattern;
+            this.HeaderConditions[header] = pattern;
             return this;
         }
     }
@@ -66,17 +66,17 @@ namespace Grapevine
         public Route(Func<IHttpContext, Task> action, HttpMethod method, IRouteTemplate routeTemplate, bool enabled = true, string name = null, string description = null)
             : base(method, routeTemplate, enabled, name, description)
         {
-            RouteAction = action;
-            Name = (string.IsNullOrWhiteSpace(name))
+            this.RouteAction = action;
+            this.Name = (string.IsNullOrWhiteSpace(name))
                 ? action.Method.Name
                 : name;
         }
 
         public override async Task InvokeAsync(IHttpContext context)
         {
-            if (!Enabled) return;
-            context.Request.PathParameters = RouteTemplate.ParseEndpoint(context.Request.Endpoint);
-            await RouteAction(context).ConfigureAwait(false);
+            if (!this.Enabled) return;
+            context.Request.PathParameters = this.RouteTemplate.ParseEndpoint(context.Request.Endpoint);
+            await this.RouteAction(context).ConfigureAwait(false);
         }
     }
 
@@ -92,15 +92,15 @@ namespace Grapevine
 
         public Route(MethodInfo methodInfo, HttpMethod method, IRouteTemplate routeTemplate, bool enabled = true, string name = null, string description = null) : base(method, routeTemplate, enabled, name, description)
         {
-            RouteAction = (Func<T, IHttpContext, Task>)Delegate.CreateDelegate(typeof(Func<T, IHttpContext, Task>), null, methodInfo);
-            if (string.IsNullOrWhiteSpace(Name)) Name = methodInfo.Name;
+            this.RouteAction = (Func<T, IHttpContext, Task>)Delegate.CreateDelegate(typeof(Func<T, IHttpContext, Task>), null, methodInfo);
+            if (string.IsNullOrWhiteSpace(this.Name)) this.Name = methodInfo.Name;
         }
 
         public override async Task InvokeAsync(IHttpContext context)
         {
-            if (!Enabled) return;
-            context.Request.PathParameters = RouteTemplate.ParseEndpoint(context.Request.Endpoint);
-            await RouteAction(context.Services.GetRequiredService<T>(), context).ConfigureAwait(false);
+            if (!this.Enabled) return;
+            context.Request.PathParameters = this.RouteTemplate.ParseEndpoint(context.Request.Endpoint);
+            await this.RouteAction(context.Services.GetRequiredService<T>(), context).ConfigureAwait(false);
         }
     }
 }

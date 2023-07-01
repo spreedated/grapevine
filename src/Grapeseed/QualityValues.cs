@@ -8,15 +8,15 @@ namespace Grapevine
     {
         private static Regex[] specificities = new Regex[2]
         {
-            new Regex("[^*]+"),       // totally specific
-            new Regex(@"^[^*/]/\*$"), // partially specific
+            new("[^*]+"),       // totally specific
+            new(@"^[^*/]/\*$"), // partially specific
         };
 
         public static IList<string> Parse(string header)
         {
-            var values = new List<string>();
+            List<string> values = new();
 
-            foreach (var item in GroupByQualityFactor(header))
+            foreach (KeyValuePair<decimal, List<string>> item in GroupByQualityFactor(header))
                 values.AddRange(SortBySpecificity(item.Value));
 
             return values;
@@ -24,7 +24,7 @@ namespace Grapevine
 
         public static SortedDictionary<decimal, List<string>> GroupByQualityFactor(string value)
         {
-            SortedDictionary<decimal, List<string>> factors = new SortedDictionary<decimal, List<string>>();
+            SortedDictionary<decimal, List<string>> factors = new();
             foreach (var entry in value.Split(','))
             {
                 var itemFactorPair = entry.Trim().Split(new string[] { ";q=" }, StringSplitOptions.None);
@@ -33,7 +33,7 @@ namespace Grapevine
                     ? Convert.ToDecimal(itemFactorPair[1])
                     : Convert.ToDecimal(1);
 
-                if (!factors.ContainsKey(factor)) factors.Add(factor, new List<string>());
+                if (!factors.ContainsKey(factor)) factors.Add(factor, new());
                 factors[factor].Add(item);
             }
 
@@ -44,9 +44,9 @@ namespace Grapevine
         {
             if (values.Count == 1) return values;
 
-            var totally = new List<string>();
-            var partial = new List<string>();
-            var nonspec = new List<string>();
+            List<string> totally = new();
+            List<string> partial = new();
+            List<string> nonspec = new();
 
             foreach (var value in values)
             {

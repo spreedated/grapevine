@@ -7,33 +7,41 @@ namespace Grapevine
 {
     public class ListenerPrefixCollection : IListenerPrefixCollection
     {
-        public int Count => PrefixCollection.Count;
+        public int Count => this.PrefixCollection.Count;
 
-        public bool IsReadOnly => PrefixCollection.IsReadOnly;
+        public bool IsReadOnly => this.PrefixCollection.IsReadOnly;
 
-        public bool IsSynchronized => PrefixCollection.IsSynchronized;
+        public bool IsSynchronized => this.PrefixCollection.IsSynchronized;
 
         protected HttpListenerPrefixCollection PrefixCollection;
 
-        public ListenerPrefixCollection (HttpListenerPrefixCollection prefixes)
+        public ListenerPrefixCollection(HttpListenerPrefixCollection prefixes)
         {
-            PrefixCollection = prefixes;
+            this.PrefixCollection = prefixes;
         }
 
-        public void Add(string item) => PrefixCollection.Add(item);
+        public void Add(string item)
+        {
+            if (!item.EndsWith("/"))
+            {
+                item += "/";
+            }
 
-        public void Clear() => PrefixCollection.Clear();
+            this.PrefixCollection.Add(item);
+        }
 
-        public bool Contains(string item) => PrefixCollection.Contains(item);
+        public void Clear() => this.PrefixCollection.Clear();
 
-        public void CopyTo(Array array, int arrayIndex) => PrefixCollection.CopyTo(array, arrayIndex);
+        public bool Contains(string item) => this.PrefixCollection.Contains(item);
 
-        public void CopyTo(string[] array, int arrayIndex) => PrefixCollection.CopyTo(array, arrayIndex);
+        public void CopyTo(Array array, int arrayIndex) => this.PrefixCollection.CopyTo(array, arrayIndex);
 
-        public IEnumerator<string> GetEnumerator() => PrefixCollection.GetEnumerator();
+        public void CopyTo(string[] array, int arrayIndex) => this.PrefixCollection.CopyTo(array, arrayIndex);
 
-        public bool Remove(string item) => PrefixCollection.Remove(item);
+        public IEnumerator<string> GetEnumerator() => this.PrefixCollection.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator() => PrefixCollection.GetEnumerator();
+        public bool Remove(string item) => this.PrefixCollection.Remove(item);
+
+        IEnumerator IEnumerable.GetEnumerator() => this.PrefixCollection.GetEnumerator();
     }
 }

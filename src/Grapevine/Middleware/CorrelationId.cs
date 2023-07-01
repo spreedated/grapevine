@@ -1,3 +1,5 @@
+#pragma warning disable IDE0060
+
 using System;
 using System.Threading.Tasks;
 
@@ -15,16 +17,16 @@ namespace Grapevine.Middleware
 
         public CorrelationId(string fieldName, Func<string> factory)
         {
-            CorrelationIdFieldName = fieldName ?? DefaultCorrelationIdFieldName;
-            CorrelationIdFactory = factory ?? DefaultCorrelationIdFactory;
+            this.CorrelationIdFieldName = fieldName ?? DefaultCorrelationIdFieldName;
+            this.CorrelationIdFactory = factory ?? DefaultCorrelationIdFactory;
         }
 
         public async Task EnsureCorrelationIdAsync(IHttpContext context, IRestServer server)
         {
-            string value = context.Request.Headers[CorrelationIdFieldName] ?? CorrelationIdFactory();
-            context.Response.AddHeader(CorrelationIdFieldName, value);
-            context.Locals.TryAdd("CorrelationIdFieldName", CorrelationIdFieldName);
-            context.Locals.TryAdd(CorrelationIdFieldName, value);
+            string value = context.Request.Headers[this.CorrelationIdFieldName] ?? this.CorrelationIdFactory();
+            context.Response.AddHeader(this.CorrelationIdFieldName, value);
+            context.Locals.TryAdd("CorrelationIdFieldName", this.CorrelationIdFieldName);
+            context.Locals.TryAdd(this.CorrelationIdFieldName, value);
             await Task.CompletedTask;
         }
     }

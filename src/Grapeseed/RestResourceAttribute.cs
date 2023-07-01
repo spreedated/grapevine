@@ -1,5 +1,5 @@
-using System;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Grapevine
 {
@@ -29,7 +29,7 @@ namespace Grapevine
     {
         public ResourceLifetimeAttribute(ServiceLifetime serviceLifetime)
         {
-            ServiceLifetime = serviceLifetime;
+            this.ServiceLifetime = serviceLifetime;
         }
 
         public ServiceLifetime ServiceLifetime { get; }

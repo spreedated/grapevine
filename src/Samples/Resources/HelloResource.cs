@@ -1,6 +1,6 @@
-using System.Threading.Tasks;
 using Grapevine;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace Samples.Resources
 {
