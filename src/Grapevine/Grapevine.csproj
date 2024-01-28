@@ -1,18 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net472</TargetFrameworks>
+    <TargetFrameworks>net472;net8.0</TargetFrameworks>
     <PackageId>Grapevine</PackageId>
     <PackageVersion>$(Version)</PackageVersion>
     <Authors>Scott Offen</Authors>
-    <Copyright>© 2014-2019 Scott Offen</Copyright>
+    <Copyright>© 2014-2024 Scott Offen</Copyright>
     <Owners>Scott Offen</Owners>
     <Description>Fast, unopinionated, embeddable, minimalist REST framework for .NET</Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageTags>rest http api web router client server express json xml embedded</PackageTags>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
-    <Version>5.0.0-rc.16</Version>
+    <Version>5.0.0-rc.17</Version>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryUrl>https://github.com/scottoffen/grapevine</RepositoryUrl>
@@ -30,8 +30,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
