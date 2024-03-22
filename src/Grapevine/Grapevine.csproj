@@ -5,7 +5,7 @@
     <PackageId>Grapevine</PackageId>
     <PackageVersion>$(Version)</PackageVersion>
     <Authors>Scott Offen</Authors>
-    <Copyright>© 2014-2019 Scott Offen</Copyright>
+    <Copyright>© 2014-2024 Scott Offen</Copyright>
     <Owners>Scott Offen</Owners>
     <Description>Fast, unopinionated, embeddable, minimalist REST framework for .NET</Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
