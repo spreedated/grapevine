@@ -11,7 +11,7 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
-    <Version>8.0.0</Version>
+    <Version>8.0.1</Version>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryUrl>https://github.com/scottoffen/grapevine</RepositoryUrl>
@@ -26,6 +26,7 @@
     <AssemblyOriginatorKeyFile>grapeseed.snk</AssemblyOriginatorKeyFile>
     <LangVersion>latest</LangVersion>
     <NoWarn>1701;1702;IDE0063;S3925</NoWarn>
+    <DebugSymbols Condition="'$(Configuration)' == 'Debug'">True</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
