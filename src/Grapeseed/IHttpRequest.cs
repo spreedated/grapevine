@@ -135,9 +135,18 @@ namespace Grapevine
                 : request.ContentType.Substring(_startIndex);
         }
 
+        /// <summary>
+        /// Returns a dictionary of key/value pairs from the form-urlencoded data in the request body
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="useQueryArguments"></param>
+        /// <returns>An empty collection if nothing is provided</returns>
         public static async Task<IDictionary<string, string>> ParseFormUrlEncodedData(this IHttpRequest request, bool useQueryArguments = false)
         {
-            Dictionary<string, string> data = new();
+            if (request.InputStream == null)
+            {
+                return null;
+            }
 
             using (StreamReader reader = new(request.InputStream, request.ContentEncoding))
             {
@@ -151,14 +160,19 @@ namespace Grapevine
                     payload = await reader.ReadToEndAsync();
                 }
 
-                ProcessPayload(payload, data);
+                return ProcessPayload(payload);
             }
-
-            return data;
         }
 
-        private static void ProcessPayload(string payload, Dictionary<string, string> data)
+        private static Dictionary<string, string> ProcessPayload(string payload)
         {
+            if (string.IsNullOrEmpty(payload))
+            {
+                return [];
+            }
+
+            Dictionary<string, string> data = [];
+
             foreach (var kvp in payload.Split('&'))
             {
                 var pair = kvp.Split('=');
@@ -173,6 +187,8 @@ namespace Grapevine
 
                 data.Add(key, value);
             }
+
+            return data;
         }
     }
 }
