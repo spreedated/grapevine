@@ -207,7 +207,7 @@ namespace Grapevine
         {
             // 1. Create context
             IHttpContext context = this.Options.HttpContextFactory(state, this.TokenSource.Token);
-            this.Logger.LogTrace($"{context.Id} : Request Received {context.Request.Name}");
+            this.Logger.LogTrace("{Id} : Request Received {Name}", context.Id, context.Request.Name);
 
             // 2. Apply global response headers
             this.ApplyGlobalResponseHeaders(context.Response.Headers);
@@ -215,23 +215,23 @@ namespace Grapevine
             // 3. Execute OnRequest event handlers
             try
             {
-                this.Logger.LogTrace($"{context.Id} : Invoking OnRequest Handlers for {context.Request.Name}");
+                this.Logger.LogTrace("{Id} : Invoking OnRequest Handlers for {Name}", context.Id, context.Request.Name);
                 var count = (this.OnRequestAsync != null) ? this.OnRequestAsync.Invoke(context, this).Result : 0;
-                this.Logger.LogTrace($"{context.Id} : {count} OnRequest Handlers Invoked for {context.Request.Name}");
+                this.Logger.LogTrace("{Id} : {Count} OnRequest Handlers Invoked for {Name}", context.Id, count, context.Request.Name);
             }
-            catch (System.Net.HttpListenerException hl) when (hl.ErrorCode == 1229)
+            catch (HttpListenerException hl) when (hl.ErrorCode == 1229)
             {
-                this.Logger.LogDebug($"{context.Id} : The remote connection was closed before a response could be sent for {context.Request.Name}.");
+                this.Logger.LogError(hl, "{Id} : The remote connection was closed before a response could be sent for {Name}.", context.Id, context.Request.Name);
             }
             catch (Exception e)
             {
-                this.Logger.LogError(e, $"{context.Id} An exception occurred while routing request {context.Request.Name}");
+                this.Logger.LogError(e, "{Id} An exception occurred while routing request {Name}", context.Id, context.Request.Name);
             }
 
             // 4. Optionally route request
             if (!context.WasRespondedTo)
             {
-                this.Logger.LogTrace($"{context.Id} : Routing request {context.Request.Name}");
+                this.Logger.LogTrace("{Id} : Routing request {Name}", context.Id, context.Request.Name);
                 ThreadPool.QueueUserWorkItem(this.Router.RouteAsync, context);
             }
         }
