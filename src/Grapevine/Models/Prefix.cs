@@ -14,7 +14,7 @@ namespace Grapevine.Models
         public Protocols Protocol { get; set; }
         public static Prefix Parse(string input)
         {
-            if (!input.Contains(":") || !input.Contains("/") || input.Count(x => x == '/') < 2 || !input.ToLower().StartsWith("http"))
+            if (!input.Contains(':') || !input.Contains('/') || input.Count(x => x == '/') < 2 || !input.ToLower().StartsWith("http", System.StringComparison.InvariantCultureIgnoreCase))
             {
                 return null;
             }
@@ -23,7 +23,7 @@ namespace Grapevine.Models
             {
                 Protocol = input.Substring(0, input.IndexOf(':')).EndsWith("s") ? Protocols.Https : Protocols.Http,
                 Domain = input.Substring(input.IndexOf('/') + 2, input.LastIndexOf(':') - input.IndexOf('/') - 2),
-                Port = int.Parse(input.Substring(input.LastIndexOf(':') + 1).TrimEnd('/'))
+                Port = int.Parse(input.Substring(startIndex: input.LastIndexOf(':') + 1).TrimEnd('/'))
             };
         }
 

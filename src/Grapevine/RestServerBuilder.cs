@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -125,24 +126,22 @@ namespace Grapevine
             var type = typeof(T);
 
             // Get the constructor
-            var constructor = type.GetConstructors().FirstOrDefault(c =>
+            var constructor = Array.Find(type.GetConstructors(), c =>
             {
                 var args = c.GetParameters();
-                return args.Length == 1 && args.First().ParameterType == typeof(IConfiguration);
+                return args.Length == 1 && args[0].ParameterType == typeof(IConfiguration);
             });
 
             // Get the configuration
             var config = GetDefaultConfiguration();
 
             // Instanciate startup
-            var obj = (constructor != null)
-                ? Activator.CreateInstance(type, config)
-                : Activator.CreateInstance(type);
+            object obj = (constructor != null) ? Activator.CreateInstance(type, config) : Activator.CreateInstance(type);
 
-            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+            MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
 
             // Initialize Configuration: ReturnType(IConfiguration), Args(null)
-            var mci = methods.FirstOrDefault(m => m.ReturnParameter.ParameterType == typeof(IConfiguration) && m.GetParameters().Length == 0);
+            MethodInfo mci = Array.Find(methods, m => m.ReturnParameter.ParameterType == typeof(IConfiguration) && m.GetParameters().Length == 0);
             IConfiguration configInitializer()
             {
                 if (mci == null) return config;
@@ -150,7 +149,7 @@ namespace Grapevine
             }
 
             // Initialize Services: ReturnType(IServiceCollection), Args(null)
-            var msi = methods.FirstOrDefault(m => m.ReturnParameter.ParameterType == typeof(IServiceCollection) && m.GetParameters().Length == 0);
+            MethodInfo msi = Array.Find(methods, m => m.ReturnParameter.ParameterType == typeof(IServiceCollection) && m.GetParameters().Length == 0);
             IServiceCollection serviceInitializer()
             {
                 if (msi == null) return new ServiceCollection();
@@ -158,19 +157,19 @@ namespace Grapevine
             }
 
             // Configure Services: ReturnType(void), Arg[0](IServiceCollection)
-            var mcs = methods.Where(m => m.ReturnParameter.ParameterType == typeof(void) && m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType == typeof(IServiceCollection));
+            IEnumerable<MethodInfo> mcs = methods.Where(m => m.ReturnParameter.ParameterType == typeof(void) && m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType == typeof(IServiceCollection));
             void configureServices(IServiceCollection s)
             {
                 if (!mcs.Any()) return;
-                foreach (var method in mcs) method.Invoke(obj, new object[] { s });
+                foreach (var method in mcs) method.Invoke(obj, [s]);
             }
 
             // Configure Server: ReturnType(void), Arg[0](IRestServer)
-            var mcr = methods.Where(m => m.ReturnParameter.ParameterType == typeof(void) && m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType == typeof(IRestServer));
+            IEnumerable<MethodInfo> mcr = methods.Where(m => m.ReturnParameter.ParameterType == typeof(void) && m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType == typeof(IRestServer));
             void configureServer(IRestServer s)
             {
                 if (!mcr.Any()) return;
-                foreach (var method in mcr) method.Invoke(obj, new object[] { s });
+                foreach (var method in mcr) method.Invoke(obj, [s]);
             }
 
             return new RestServerBuilder(serviceInitializer(), configInitializer(), configureServices, configureServer);

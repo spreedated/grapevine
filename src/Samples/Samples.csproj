@@ -5,10 +5,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentHttpClient" Version="4.0.0" />
+    <PackageReference Include="FluentHttpClient" Version="4.3.2" />
     <PackageReference Include="HttpMultipartParser" Version="8.4.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="5.3.11" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.3.14" />
   </ItemGroup>
 
   <!-- Use these lines to publish the website along with your application -->

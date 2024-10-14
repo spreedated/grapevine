@@ -1,53 +1,10 @@
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 
 namespace Grapevine
 {
-    public abstract class RestServerBase : IRestServer
-    {
-        public IList<IContentFolder> ContentFolders { get; } = new List<IContentFolder>();
-
-        public IList<GlobalResponseHeaders> GlobalResponseHeaders { get; set; } = new List<GlobalResponseHeaders>();
-
-        public virtual bool IsListening { get; }
-
-        public Locals Locals { get; set; } = new Locals();
-
-        public ILogger<IRestServer> Logger { get; protected set; }
-
-        public ServerOptions Options { get; } = new ServerOptions
-        {
-            HttpContextFactory = (state, token) => new HttpContext(state as HttpListenerContext, token)
-        };
-
-        public virtual IListenerPrefixCollection Prefixes { get; }
-
-        public IRouter Router { get; set; }
-
-        public IRouteScanner RouteScanner { get; set; }
-
-        /// <summary>
-        /// Gets or sets the CancellationTokeSource for this RestServer object.
-        /// </summary>
-        /// <value></value>
-        protected CancellationTokenSource TokenSource { get; set; }
-
-        public abstract event ServerEventHandler AfterStarting;
-        public abstract event ServerEventHandler AfterStopping;
-        public abstract event ServerEventHandler BeforeStarting;
-        public abstract event ServerEventHandler BeforeStopping;
-        public virtual RequestReceivedEvent OnRequestAsync { get; set; } = new RequestReceivedEvent();
-
-        public abstract void Dispose();
-
-        public abstract void Start();
-
-        public abstract void Stop();
-    }
-
     public class RestServer : RestServerBase
     {
         /// <summary>
@@ -61,7 +18,7 @@ namespace Grapevine
         /// <value></value>
         public bool IsDisposed { get; private set; }
 
-        public override bool IsListening => Convert.ToBoolean(Listener?.IsListening);
+        public override bool IsListening => Convert.ToBoolean(this.Listener?.IsListening);
 
         /// <summary>
         /// Gets a value that indicates whether the server is in the process of stopping.
@@ -91,36 +48,24 @@ namespace Grapevine
         public RestServer(IRouter router, IRouteScanner scanner, ILogger<IRestServer> logger)
         {
             if (!HttpListener.IsSupported)
+            {
                 throw new PlatformNotSupportedException("Windows Server 2003 (or higher) or Windows XP SP2 (or higher) is required to use instances of this class.");
+            }
 
             this.Router = router ?? new Router(DefaultLogger.GetInstance<IRouter>());
             this.RouteScanner = scanner ?? new RouteScanner(DefaultLogger.GetInstance<IRouteScanner>());
             this.Logger = logger ?? DefaultLogger.GetInstance<IRestServer>();
 
-            if (this.Router is RouterBase)
-                (this.Router as RouterBase).HandleHttpListenerExceptions();
+            if (this.Router is RouterBase routerBase)
+            {
+                routerBase.HandleHttpListenerExceptions();
+            }
 
             this.RouteScanner.Services = this.Router.Services;
 
             this.Listener = new HttpListener();
             this.Prefixes = new ListenerPrefixCollection(this.Listener.Prefixes);
             this.RequestHandler = new Thread(this.RequestListenerAsync);
-        }
-
-        public override void Dispose()
-        {
-            if (this.IsDisposed) return;
-
-            try
-            {
-                this.Stop();
-                this.Listener.Close();
-                this.TokenSource?.Dispose();
-            }
-            finally
-            {
-                this.IsDisposed = true;
-            }
         }
 
         public override void Start()
@@ -142,7 +87,9 @@ namespace Grapevine
 
                 // 3. Optionally autoscan for routes
                 if (this.Router.RoutingTable.Count == 0 && this.Options.EnableAutoScan)
+                {
                     this.Router.Register(this.RouteScanner.Scan());
+                }
 
                 // 4. Configure and start the listener
                 this.Listener.Start();
@@ -180,7 +127,7 @@ namespace Grapevine
                 if (exceptionWasThrown)
                 {
                     this.Listener.Stop();
-                    this.TokenSource.Cancel();
+                    this.TokenSource?.Cancel();
                 }
 
                 this.IsStarting = false;
@@ -195,8 +142,16 @@ namespace Grapevine
 
         public override void Stop()
         {
-            if (this.IsDisposed) throw new ObjectDisposedException(this.GetType().FullName);
-            if (this.IsStopping || this.IsStarting) return;
+            if (this.IsDisposed)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
+
+            if (this.IsStopping || this.IsStarting)
+            {
+                return;
+            }
+
             this.IsStopping = true;
 
             try
@@ -224,28 +179,22 @@ namespace Grapevine
             }
         }
 
-        protected async void RequestListenerAsync()
+        protected void RequestListenerAsync()
         {
             while (this.Listener.IsListening)
             {
                 try
                 {
-                    var context = await this.Listener.GetContextAsync();
+                    HttpListenerContext context = this.Listener.GetContextAsync().Result;
                     ThreadPool.QueueUserWorkItem(this.RequestHandlerAsync, context);
                 }
-                catch (HttpListenerException hl) when (hl.ErrorCode == 995 && (IsStopping || !IsListening))
+                catch (HttpListenerException hl) when (hl.ErrorCode == 995 && (this.IsStopping || !this.IsListening))
                 {
-                    /*
-                    * Ignore exceptions thrown by incomplete async methods listening for
-                    * incoming requests during shutdown
-                    */
+                    //noop
                 }
                 catch (ObjectDisposedException) when (this.IsDisposed)
                 {
-                    /*
-                    * Ignore object disposed exceptions thrown during shutdown
-                    * see: https://stackoverflow.com/a/13352359
-                    */
+                    //noop
                 }
                 catch (Exception e)
                 {
@@ -254,10 +203,10 @@ namespace Grapevine
             }
         }
 
-        protected async void RequestHandlerAsync(object state)
+        protected void RequestHandlerAsync(object state)
         {
             // 1. Create context
-            var context = Options.HttpContextFactory(state, TokenSource.Token);
+            IHttpContext context = this.Options.HttpContextFactory(state, this.TokenSource.Token);
             this.Logger.LogTrace($"{context.Id} : Request Received {context.Request.Name}");
 
             // 2. Apply global response headers
@@ -267,7 +216,7 @@ namespace Grapevine
             try
             {
                 this.Logger.LogTrace($"{context.Id} : Invoking OnRequest Handlers for {context.Request.Name}");
-                var count = (this.OnRequestAsync != null) ? await this.OnRequestAsync.Invoke(context, this) : 0;
+                var count = (this.OnRequestAsync != null) ? this.OnRequestAsync.Invoke(context, this).Result : 0;
                 this.Logger.LogTrace($"{context.Id} : {count} OnRequest Handlers Invoked for {context.Request.Name}");
             }
             catch (System.Net.HttpListenerException hl) when (hl.ErrorCode == 1229)
@@ -282,9 +231,30 @@ namespace Grapevine
             // 4. Optionally route request
             if (!context.WasRespondedTo)
             {
-                Logger.LogTrace($"{context.Id} : Routing request {context.Request.Name}");
+                this.Logger.LogTrace($"{context.Id} : Routing request {context.Request.Name}");
                 ThreadPool.QueueUserWorkItem(this.Router.RouteAsync, context);
             }
         }
+
+        #region Dispose
+        public override void Dispose()
+        {
+            if (this.IsDisposed)
+            {
+                return;
+            }
+
+            try
+            {
+                this.Stop();
+                this.Listener.Close();
+                this.TokenSource?.Dispose();
+            }
+            finally
+            {
+                this.IsDisposed = true;
+            }
+        }
+        #endregion
     }
 }
