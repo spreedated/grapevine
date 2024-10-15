@@ -70,8 +70,16 @@ namespace Grapevine
 
         public override void Start()
         {
-            if (this.IsDisposed) throw new ObjectDisposedException(this.GetType().FullName);
-            if (this.IsListening || this.IsStarting || this.IsStopping) return;
+            if (this.IsDisposed)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
+
+            if (this.IsListening || this.IsStarting || this.IsStopping)
+            {
+                return;
+            }
+
             this.IsStarting = true;
 
             var exceptionWasThrown = false;
