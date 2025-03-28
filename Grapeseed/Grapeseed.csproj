@@ -25,7 +25,7 @@
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>grapeseed.snk</AssemblyOriginatorKeyFile>
     <LangVersion>latest</LangVersion>
-    <NoWarn>1701;1702;IDE0063;S3925</NoWarn>
+    <NoWarn>1701;1702;IDE0063;S3925;IDE0290</NoWarn>
     <DebugSymbols Condition="'$(Configuration)' == 'Debug'">True</DebugSymbols>
   </PropertyGroup>
 
