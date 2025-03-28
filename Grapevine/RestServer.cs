@@ -53,7 +53,7 @@ namespace Grapevine
             }
 
             this.Router = router ?? new Router(DefaultLogger.GetInstance<IRouter>());
-            this.RouteScanner = scanner ?? new RouteScanner(DefaultLogger.GetInstance<IRouteScanner>());
+            this.RouteScanner = scanner ?? new RouteScanner(DefaultLogger.GetInstance<RouteScanner>());
             this.Logger = logger ?? DefaultLogger.GetInstance<IRestServer>();
 
             if (this.Router is RouterBase routerBase)
