@@ -2,22 +2,6 @@
 
 Grapevine is a fast, unopinionated, embeddable, minimalist web framework for .NET. Grapevine is not intended to be a replacement for IIS or ASP.NET, but rather to function as an embedded REST/HTTP server in non-ASP.NET projects.
 
-<!-- Shields: http://shields.io/ -->
-
-## Installation
-
-Grapevine is available on [NuGet.org](https://www.nuget.org/packages/Grapevine/) and can be installed using a NuGet package manager or the .NET CLI.
-
-Powershell:
-```powershell
-Install-Package Grapevine -Version 5.0.0-rc.10
-```
-
-.NET CLI
-```cmd
-> dotnet add package Grapevine --version 5.0.0-rc.10
-```
-
 ## Usage
 
 Grapevine is easy to get started with.
@@ -67,14 +51,6 @@ Successfully hit the test route!
 - Have a question you can't find an answer for in the documentation? For the fastest and best results, ask your questions on [StackOverflow](https://stackoverflow.com) using [#grapevine](https://stackoverflow.com/questions/tagged/grapevine?sort=newest). Make sure you include the version of Grapevine you are using, the platform you using it on, code samples and any specific error messages you are seeing.
 
 - **Issues created to ask "how to" questions will be closed.**
-
-## Contributing
-
-We welcome contributions from the community! In order to ensure the best experience for everyone, before creating an issue or submitting a pull request, please see the [contributing guidelines](CONTRIBUTING.md) and the [code of conduct](CODE_OF_CONDUCT.md). Failure to adhere to these guidelines can result in significant delays in getting your contributions included in the project.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/scottoffen/grapevine/releases).
 
 ## License
 
