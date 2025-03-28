@@ -1,17 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net472</TargetFrameworks>
+    <TargetFrameworks>net9.0;net472</TargetFrameworks>
     <PackageId>Grapeseed</PackageId>
     <PackageVersion>$(Version)</PackageVersion>
-    <Authors>Scott Offen</Authors>
+    <Authors>Scott Offen;Dante Wackermann</Authors>
     <Copyright>© 2014-2024 Scott Offen</Copyright>
     <Owners>Scott Offen</Owners>
     <Description>Grapevine abstractions</Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
-    <Version>8.0.1</Version>
+    <Version>9.0.0</Version>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryUrl>https://github.com/scottoffen/grapevine</RepositoryUrl>
@@ -25,13 +25,13 @@
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>grapeseed.snk</AssemblyOriginatorKeyFile>
     <LangVersion>latest</LangVersion>
-    <NoWarn>1701;1702;IDE0063;S3925</NoWarn>
+    <NoWarn>1701;1702;IDE0063;S3925;IDE0290</NoWarn>
     <DebugSymbols Condition="'$(Configuration)' == 'Debug'">True</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.3" />
   </ItemGroup>
 
     <ItemGroup Condition="$(TargetFramework) == 'net472'">
@@ -39,13 +39,13 @@
     </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\LICENSE" Pack="true" Visible="false" PackagePath="" />
-    <None Include="..\..\grapevine.png" Pack="true" PackagePath="\" />
+    <None Include="../LICENSE" Pack="true" Visible="false" PackagePath="" />
+    <None Include="../grapevine.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <PackageReference Include="FluentHttpClient">
-      <Version>4.0.0</Version>
+      <Version>4.3.2</Version>
     </PackageReference>
   </ItemGroup>
 </Project>

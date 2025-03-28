@@ -23,7 +23,7 @@ namespace Grapevine
             get
             {
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(a => a.GetName().Name != "Grapevine" && a.GetName().Name != "Grapeseed" && !a.GetName().Name.StartsWith(this.IgnoredAssemblies.ToArray()))
+                    .Where(a => a.GetName().Name != "Grapevine" && a.GetName().Name != "Grapeseed" && !a.GetName().Name.StartsWith([.. this.IgnoredAssemblies]))
 #if NETSTANDARD
                     .Where(a => !a.GlobalAssemblyCache)
 #endif
@@ -58,18 +58,18 @@ namespace Grapevine
         /// Gets the logger for this RouteScanner object
         /// </summary>
         /// <value></value>
-        public ILogger<IRouteScanner> Logger { get; }
+        public ILogger<RouteScanner> Logger { get; }
 
-        public RouteScanner(ILogger<IRouteScanner> logger)
+        public RouteScanner(ILogger<RouteScanner> logger)
         {
-            this.Logger = logger ?? DefaultLogger.GetInstance<IRouteScanner>();
+            this.Logger = logger ?? DefaultLogger.GetInstance<RouteScanner>();
         }
 
         public override IList<IRoute> Scan(string basePath = null)
         {
             var basepath = (basePath ?? this.BasePath).SanitizePath();
 
-            List<IRoute> routes = new();
+            List<IRoute> routes = [];
             this.Logger.LogTrace("Begin Global Route Scanning");
 
             foreach (var assembly in this.Assemblies)
@@ -88,7 +88,7 @@ namespace Grapevine
                 }
             }
 
-            this.Logger.LogTrace($"Global Route Scanning Complete: {routes.Count} total routes found");
+            this.Logger.LogTrace("Global Route Scanning Complete: {Count} total routes found", routes.Count);
 
             return routes;
         }
@@ -96,10 +96,10 @@ namespace Grapevine
         public override IList<IRoute> Scan(Assembly assembly, string basePath = null)
         {
             var basepath = (basePath ?? this.BasePath).SanitizePath();
-            List<IRoute> routes = new();
+            List<IRoute> routes = [];
 
             var name = assembly.GetName().FullName;
-            this.Logger.LogTrace($"Scanning assembly {name} for routes");
+            this.Logger.LogTrace("Scanning assembly {Name} for routes", name);
 
             try
             {
@@ -113,15 +113,15 @@ namespace Grapevine
                     this.Logger.LogDebug(loaderEx, message);
             }
 
-            this.Logger.LogTrace($"Scan of assembly {name} complete: {routes.Count} total routes found");
+            this.Logger.LogTrace("Scan of assembly {Name} complete: {Count} total routes found", name, routes.Count);
 
             return routes;
         }
 
         public override IList<IRoute> Scan(Type type, string basePath = null)
         {
-            List<IRoute> routes = new();
-            this.Logger.LogTrace($"Scanning type {type.Name} for routes");
+            List<IRoute> routes = [];
+            this.Logger.LogTrace("Scanning type {Name} for routes", type.Name);
 
             var attribute = type.GetCustomAttributes(typeof(RestResourceAttribute))
                 .Cast<RestResourceAttribute>().FirstOrDefault();
@@ -156,7 +156,7 @@ namespace Grapevine
                 }
             }
 
-            this.Logger.LogTrace($"Scan of type {type.Name} complete: {routes.Count} total routes found");
+            this.Logger.LogTrace("Scan of type {Name} complete: {Count} total routes found", type.Name, routes.Count);
             return routes;
         }
 
@@ -188,10 +188,10 @@ namespace Grapevine
                 // 4. Add route to routing table
                 routes.Add(route);
 
-                this.Logger.LogTrace($"Generated route {route}");
+                this.Logger.LogTrace("Generated route {Route}", route);
             }
 
-            this.Logger.LogTrace($"Scan of method {methodInfo.Name} complete: {routes.Count} total routes found");
+            this.Logger.LogTrace("Scan of method {Name} complete: {Count} total routes found", methodInfo.Name, routes.Count);
 
             return routes;
         }
@@ -204,7 +204,7 @@ namespace Grapevine
         public static IEnumerable<Type> GetQualifiedTypes(Assembly assembly)
         {
             foreach (var type in assembly.GetTypes()
-                .Where(t => t.IsClass && t.IsDefined(typeof(RestResourceAttribute), false))
+                .Where(t => t.IsClass && t.IsDefined(typeof(RestResourceAttribute), true))
                 .OrderBy(t => t.Name)) yield return type;
         }
 

@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net472</TargetFrameworks>
+    <TargetFrameworks>net9.0;net472</TargetFrameworks>
     <PackageId>Grapevine</PackageId>
     <PackageVersion>$(Version)</PackageVersion>
-    <Authors>Scott Offen</Authors>
+    <Authors>Scott Offen;Dante Wackermann</Authors>
     <Copyright>© 2014-2024 Scott Offen</Copyright>
     <Owners>Scott Offen</Owners>
     <Description>Fast, unopinionated, embeddable, minimalist REST framework for .NET</Description>
@@ -12,7 +12,7 @@
     <PackageTags>rest http api web router client server express json xml embedded</PackageTags>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
-    <Version>8.0.1</Version>
+    <Version>9.0.0</Version>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryUrl>https://github.com/scottoffen/grapevine</RepositoryUrl>
@@ -26,13 +26,13 @@
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>grapevine.snk</AssemblyOriginatorKeyFile>
     <LangVersion>latest</LangVersion>
-    <NoWarn>1701;1702;IDE0063;S3925</NoWarn>
+    <NoWarn>1701;1702;IDE0063;S3925;IDE0290</NoWarn>
     <DebugSymbols Condition="'$(Configuration)' == 'Debug'">True</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -51,8 +51,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\LICENSE" Pack="true" Visible="false" PackagePath="" />
-    <None Include="..\..\grapevine.png" Pack="true" PackagePath="\" />
+    <None Include="../LICENSE" Pack="true" Visible="false" PackagePath="" />
+    <None Include="../grapevine.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
