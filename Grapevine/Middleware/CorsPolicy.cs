@@ -30,7 +30,7 @@ namespace Grapevine.Middleware
 
         public CorsPolicy(IEnumerable<Uri> allowOrigins)
         {
-            this._allowedOrigins = allowOrigins.Cast<string>();
+            this._allowedOrigins = allowOrigins.Select(u => u.ToString());
         }
 
         public async Task ApplyAsync(IHttpContext context, IRestServer server)

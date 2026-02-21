@@ -153,7 +153,7 @@ namespace Grapevine
                 string payload = null;
                 if (useQueryArguments || request.InputStream == Stream.Null)
                 {
-                    payload = request.Url.Query.TrimStart('?');
+                    payload = request.Url.Query?.TrimStart('?');
                 }
                 else
                 {
@@ -176,13 +176,23 @@ namespace Grapevine
             foreach (var kvp in payload.Split('&'))
             {
                 var pair = kvp.Split('=');
+
+                if (pair.Length <= 0)
+                {
+                    continue;
+                }
+
                 var key = pair[0];
-                var value = pair[1];
+                var value = pair.Length <= 1 ? null : pair[1];
 
                 string decoded;
-                while ((decoded = Uri.UnescapeDataString(value)) != value)
+
+                if (!string.IsNullOrEmpty(value))
                 {
-                    value = decoded;
+                    while ((decoded = Uri.UnescapeDataString(value)) != value)
+                    {
+                        value = decoded;
+                    }
                 }
 
                 data.Add(key, value);
