@@ -93,7 +93,7 @@ namespace Grapevine
 
         public static IRestServer UseCorsPolicy(this IRestServer server, IEnumerable<string> allowOrigins)
         {
-            return server.UseCorsPolicy(allowOrigins.Cast<Uri>().ToList());
+            return server.UseCorsPolicy(allowOrigins.Select(x => new Uri(x)));
         }
 
         public static IRestServer UseCorsPolicy(this IRestServer server, IEnumerable<Uri> allowOrigins)
@@ -110,9 +110,7 @@ namespace Grapevine
         public static string GetCorrelationId(this IHttpContext context)
         {
             var fieldName = context.Locals.Get("CorrelationIdFieldName").ToString();
-            return (fieldName != null)
-                ? context.Locals.Get(fieldName).ToString()
-                : null;
+            return (fieldName != null) ? context.Locals.Get(fieldName).ToString() : null;
         }
     }
 }
