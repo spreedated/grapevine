@@ -1,12 +1,12 @@
 using Grapevine.Models;
+using NUnit.Framework;
 using Shouldly;
-using Xunit;
 
 namespace Grapevine.Tests
 {
     public class PrefixTests
     {
-        [Fact]
+        [Test]
         public void ParseAndAddPrefixes()
         {
             Prefix p = Prefix.Parse("http://localhost:1234");

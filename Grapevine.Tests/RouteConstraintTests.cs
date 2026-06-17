@@ -1,9 +1,9 @@
+using NUnit.Framework;
 using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Xunit;
 
 namespace Grapevine.Tests
 {
@@ -11,7 +11,7 @@ namespace Grapevine.Tests
     {
         public class AlphaResolver
         {
-            [Fact]
+            [Test]
             public void returns_alpha_pattern_with_repetition_quantifier()
             {
                 var constraints = "alpha".Split(':').ToList();
@@ -22,7 +22,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_alpha_pattern_with_minimum_length_quantifier()
             {
                 var constraints = "alpha:minlength(2)".Split(':').ToList();
@@ -33,7 +33,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_alpha_pattern_with_maximum_length_quantifier()
             {
                 var constraints = "alpha:maxlength(2)".Split(':').ToList();
@@ -44,7 +44,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_alpha_pattern_with_exact_length_quantifier()
             {
                 var constraints = "alpha:length(2)".Split(':').ToList();
@@ -55,7 +55,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_alpha_pattern_with_range_length_quantifier()
             {
                 var constraints = "alpha:length(2,5)".Split(':').ToList();
@@ -69,7 +69,7 @@ namespace Grapevine.Tests
 
         public class AlphaNumericResolver
         {
-            [Fact]
+            [Test]
             public void returns_alphanum_pattern_with_repetition_quantifier()
             {
                 var constraints = "alphanum".Split(':').ToList();
@@ -80,7 +80,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_alphanum_pattern_with_minimum_length_quantifier()
             {
                 var constraints = "alphanum:minlength(2)".Split(':').ToList();
@@ -91,7 +91,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_alphanum_pattern_with_maximum_length_quantifier()
             {
                 var constraints = "alphanum:maxlength(2)".Split(':').ToList();
@@ -102,7 +102,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_alphanum_pattern_with_exact_length_quantifier()
             {
                 var constraints = "alphanum:length(2)".Split(':').ToList();
@@ -113,7 +113,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_alphanum_pattern_with_range_length_quantifier()
             {
                 var constraints = "alphanum:length(2,5)".Split(':').ToList();
@@ -131,7 +131,7 @@ namespace Grapevine.Tests
 
             private static RouteConstraintResolver customResolver = (value) => { return expectedResult; };
 
-            [Fact]
+            [Test]
             public void throws_exception_when_attempting_to_override_protected_resolver()
             {
                 Should.Throw<ArgumentException>(() =>
@@ -140,7 +140,7 @@ namespace Grapevine.Tests
                 });
             }
 
-            [Fact]
+            [Test]
             public void can_add_custom_resovler()
             {
                 var customKey = "custom";
@@ -154,7 +154,7 @@ namespace Grapevine.Tests
 
         public class GuidResolver
         {
-            [Fact]
+            [Test]
             public void returns_guid_pattern_that_matches_guids()
             {
                 var guidBase = Guid.NewGuid().ToString();
@@ -182,7 +182,7 @@ namespace Grapevine.Tests
 
         public class NumericResolver
         {
-            [Fact]
+            [Test]
             public void returns_numeric_pattern_with_repetition_quantifier()
             {
                 var constraints = "num".Split(':').ToList();
@@ -193,7 +193,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_numeric_pattern_with_minimum_length_quantifier()
             {
                 var constraints = "num:minlength(2)".Split(':').ToList();
@@ -204,7 +204,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_numeric_pattern_with_maximum_length_quantifier()
             {
                 var constraints = "num:maxlength(2)".Split(':').ToList();
@@ -215,7 +215,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_numeric_pattern_with_exact_length_quantifier()
             {
                 var constraints = "num:length(2)".Split(':').ToList();
@@ -226,7 +226,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_numeric_pattern_with_range_length_quantifier()
             {
                 var constraints = "num:length(2,5)".Split(':').ToList();
@@ -240,7 +240,7 @@ namespace Grapevine.Tests
 
         public class StringResolver
         {
-            [Fact]
+            [Test]
             public void returns_string_pattern_with_repetition_quantifier()
             {
                 var constraints = "string".Split(':').ToList();
@@ -251,7 +251,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_string_pattern_with_minimum_length_quantifier()
             {
                 var constraints = "string:minlength(2)".Split(':').ToList();
@@ -262,7 +262,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_string_pattern_with_maximum_length_quantifier()
             {
                 var constraints = "string:maxlength(2)".Split(':').ToList();
@@ -273,7 +273,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_string_pattern_with_exact_length_quantifier()
             {
                 var constraints = "string:length(2)".Split(':').ToList();
@@ -284,7 +284,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_string_pattern_with_range_length_quantifier()
             {
                 var constraints = "string:length(2,5)".Split(':').ToList();
@@ -298,7 +298,7 @@ namespace Grapevine.Tests
 
         public class UnspecifiedResolver
         {
-            [Fact]
+            [Test]
             public void returns_default_pattern_when_no_constraint_is_provided()
             {
                 List<string> constraints = new List<string>();
@@ -307,7 +307,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(RouteConstraints.DefaultPattern);
             }
 
-            [Fact]
+            [Test]
             public void returns_string_pattern_with_minimum_length_quantifier()
             {
                 var constraints = "minlength(2)".Split(':').ToList();
@@ -318,7 +318,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_string_pattern_with_maximum_length_quantifier()
             {
                 var constraints = "maxlength(2)".Split(':').ToList();
@@ -329,7 +329,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_string_pattern_with_exact_length_quantifier()
             {
                 var constraints = "length(2)".Split(':').ToList();
@@ -340,7 +340,7 @@ namespace Grapevine.Tests
                 pattern.ShouldBe(expected);
             }
 
-            [Fact]
+            [Test]
             public void returns_string_pattern_with_range_length_quantifier()
             {
                 var constraints = "length(2,5)".Split(':').ToList();

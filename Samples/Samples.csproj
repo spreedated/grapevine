@@ -5,10 +5,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentHttpClient" Version="5.0.1" />
-    <PackageReference Include="HttpMultipartParser" Version="9.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.3" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="6.1.1" />
+    <PackageReference Include="FluentHttpClient" Version="5.0.3" />
+    <PackageReference Include="HttpMultipartParser" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.9" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="6.1.3" />
   </ItemGroup>
 
   <!-- Use these lines to publish the website along with your application -->
@@ -19,7 +19,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
-    <NoWarn>1701;1702;IDE0063;S1075</NoWarn>
+    <NoWarn>1701;1702;IDE0063;S1075;IDE0290</NoWarn>
   </PropertyGroup>
 
 </Project>

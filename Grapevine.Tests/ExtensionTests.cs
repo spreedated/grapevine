@@ -1,15 +1,15 @@
 using Moq;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Xunit;
 
 namespace Grapevine.Tests
 {
     public class ExtensionsTests
     {
-        [Fact]
+        [Test]
         public void ParseFormUrlEncodedDataTest()
         {
             IHttpRequest s = Mock.Of<IHttpRequest>((m) =>
@@ -21,19 +21,19 @@ namespace Grapevine.Tests
 
             r = s.ParseFormUrlEncodedData().Result;
 
-            Assert.Equal(2, r.Count);
+            Assert.That(r.Count, Is.EqualTo(2));
             Assert.True(r.ContainsKey("username"));
             Assert.True(r.ContainsKey("password"));
-            Assert.Equal("moqTest", r["username"]);
-            Assert.Equal("insecure", r["password"]);
+            Assert.That(r["username"], Is.EqualTo("moqTest"));
+            Assert.That(r["password"], Is.EqualTo("insecure"));
 
             r = s.ParseFormUrlEncodedData(true).Result;
 
-            Assert.Equal(2, r.Count);
+            Assert.That(r.Count, Is.EqualTo(2));
             Assert.True(r.ContainsKey("username"));
             Assert.True(r.ContainsKey("password"));
-            Assert.Equal("moqTest", r["username"]);
-            Assert.Equal("insecure", r["password"]);
+            Assert.That(r["username"], Is.EqualTo("moqTest"));
+            Assert.That(r["password"], Is.EqualTo("insecure"));
 
             using (MemoryStream ms = new(Encoding.UTF8.GetBytes("username=moqTest&password=insecure")))
             {
@@ -44,23 +44,23 @@ namespace Grapevine.Tests
 
                 r = s.ParseFormUrlEncodedData().Result;
 
-                Assert.Equal(2, r.Count);
+                Assert.That(r.Count, Is.EqualTo(2));
                 Assert.True(r.ContainsKey("username"));
                 Assert.True(r.ContainsKey("password"));
-                Assert.Equal("moqTest", r["username"]);
-                Assert.Equal("insecure", r["password"]);
+                Assert.That(r["username"], Is.EqualTo("moqTest"));
+                Assert.That(r["password"], Is.EqualTo("insecure"));
             }
         }
 
-        [Fact]
+        [Test]
         public void StringExtensionsStartsWithTest()
         {
             string s = "someTestString here";
-            string[] searchStrings = new string[] { "hello", "som" };
+            string[] searchStrings = ["hello", "som"];
 
             Assert.True(s.StartsWith(searchStrings));
 
-            searchStrings = new string[] { "hello", "there", "from", "seattle", "here" };
+            searchStrings = ["hello", "there", "from", "seattle", "here"];
 
             Assert.False(s.StartsWith(searchStrings));
         }
