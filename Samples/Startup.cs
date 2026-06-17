@@ -42,7 +42,6 @@ namespace Samples
             var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "website");
 
             // The following line is shorthand for:
-            //     server.ContentFolders.Add(new ContentFolder(folderPath));
             server.ContentFolders.Add(folderPath);
             server.UseContentFolders();
 

@@ -1,3 +1,4 @@
+using FluentHttpClient;
 using Grapevine;
 using System.Collections.Specialized;
 using System.Net.Http;
@@ -20,24 +21,13 @@ namespace Samples.Clients
         {
             var owner = context.Request.PathParameters["owner"];
             var repo = context.Request.PathParameters["repo"];
-            var query = (context.Request.QueryString.Count > 0)
-                ? context.Request.QueryString
-                : new NameValueCollection()
-                    {
-                        {"state", "open"},
-                        {"sort", "created"},
-                        {"direction", "desc"},
-                    };
 
             context.Response.ContentType = ContentType.Json;
 
             await context.Response.SendResponseAsync
             (
                 await this._client
-                    .UsingRoute($"/repos/{owner}/{repo}/issues")
-                    .WithQueryParams(query)
-                    .GetAsync()
-                    .GetResponseStreamAsync()
+                    .UsingRoute($"/repos/{owner}/{repo}/issues").GetAsync().ReadContentAsStreamAsync()
             );
         }
     }
